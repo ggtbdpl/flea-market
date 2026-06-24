@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<p th:if="${#lists.isEmpty(products)}">
+    <span>查询结果为空</span>
+</p >
+<!--<div th:unless="${#lists.isEmpty(products)}">-->
+<!--    <span th:text="${products.size()}">查询结果不为空</span>-->
+<!--    <p th:each="product:${products}">-->
+<!--        <span th:text="${product.pname}"></span>-&#45;&#45;-->
+<!--        <span th:text="${product.price}"></span>-&#45;&#45;-->
+<!--        <span th:text="${product.stock}"></span>-&#45;&#45;-->
+<!--        <span th:text="${product.img}"></span>-&#45;&#45;-->
+<!--    </p>-->
+<!--</div >-->
+<!--li或者span是循环体-->
+<ul th:unless="${#lists.isEmpty(products)}" >
+    <li th:each="product:${products}">
+        <span th:text="${product.pname}"></span>---
+        <span th:text="${product.price}"></span>---
+        <span th:text="${product.stock}"></span>---
+        <span th:text="${product.img}"></span>---
+    </li>
+</ul>
+</body>
+</html>

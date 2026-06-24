@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>文创产品详情</title>
+</head>
+<body>
+<!--根据属性查询-->
+名称:<span th:text="${mingcheng}"></span>
+单价:<span th:text="${danjia}"></span>
+库存:<span th:text="${kucun}"></span>
+照片:<span th:text="${tupian}"></span>
+<hr>
+<!--根据对象查询-->
+名称：<span th:text="${product.getPname()}"></span>
+价格：<span th:text="${product.getPrice()}"></span>
+库存：<span th:text="${product.getStock()}"></span>
+照片：<span th:text="${product.getImg()}"></span>
+
+<!--对象2-->
+<hr>
+<div th:object="${product}">
+    <!--/*@thymesVar id="product" type="com.shumei.pojo.Product"*/-->
+    名称：<span th:text="*{pname}"></span>
+    价格：<span th:text="*{price}"></span>
+    库存：<span th:text="*{stock}"></span>
+    照片：<span th:text="*{img}"></span>
+</div>
+
+<div th:if="${product.stock>0}">
+    <p>库存充足</p>
+</div>
+<div th:unless="${product.stock>0}">
+    <p>售罄</p>
+</div>
+</body>
+</html>

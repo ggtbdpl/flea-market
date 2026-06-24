@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        :root {
+            --primary:   #1a1a2e;
+            --accent:    #16213e;
+            --highlight: #0f3460;
+            --danger:    #e94560;
+            --success:   #00c853;
+            --bg:        #f5f7fa;
+            --surface:   #ffffff;
+            --text:      #2c3e50;
+            --muted:     #95a5a6;
+            --border:    #eef0f2;
+            --shadow:    0 8px 32px rgba(26, 26, 46, 0.08);
+            --shadow-lg: 0 20px 60px rgba(26, 26, 46, 0.12);
+            --radius:    16px;
+            --radius-sm: 10px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "PingFang SC", "Microsoft YaHei", sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            color: var(--text);
+        }
+
+        .form-card {
+            background: var(--surface);
+            padding: 40px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-lg);
+            width: 100%;
+            max-width: 480px;
+        }
+
+        h2 {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 28px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        h2::before {
+            content: "➕";
+            font-size: 24px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--text);
+        }
+
+        /* ========== 文本输入框 ========== */
+        input[type="text"] {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            font-family: inherit;
+            color: var(--text);
+            background: #fafbfc;
+            transition: all 0.3s ease;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: var(--highlight);
+            background: #fff;
+            box-shadow: 0 0 0 3px rgba(15, 52, 96, 0.06);
+        }
+
+        /* ========== 文件选择框美化 ========== */
+        input[type="file"] {
+            width: 100%;
+            padding: 10px 14px;
+            border: 2px dashed var(--border);
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            font-family: inherit;
+            color: var(--muted);
+            background: #fafbfc;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        /* 文件选择框悬停效果 */
+        input[type="file"]:hover {
+            border-color: var(--highlight);
+            background: rgba(15, 52, 96, 0.02);
+        }
+
+        /* 文件选择框聚焦效果 */
+        input[type="file"]:focus {
+            outline: none;
+            border-color: var(--highlight);
+            background: #fff;
+            box-shadow: 0 0 0 3px rgba(15, 52, 96, 0.06);
+        }
+
+        /* 隐藏原生按钮文字，自定义样式（webkit浏览器） */
+        input[type="file"]::file-selector-button {
+            padding: 8px 16px;
+            margin-right: 12px;
+            background: linear-gradient(135deg, var(--highlight) 0%, var(--accent) 100%);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        /* 文件选择按钮悬停 */
+        input[type="file"]::file-selector-button:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(15, 52, 96, 0.25);
+        }
+
+        /* ========== 预览区域 ========== */
+        .preview-box {
+            display: none;
+            margin-top: 14px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .preview-box.active {
+            display: block;
+        }
+
+        .preview-box img {
+            width: 100%;
+            max-height: 220px;
+            object-fit: cover;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+            margin-bottom: 10px;
+            background: #f8f9fa;
+        }
+
+        /* ========== 删除按钮 ========== */
+        .btn-delete {
+            padding: 8px 18px;
+            background: rgba(233, 69, 96, 0.08);
+            color: var(--danger);
+            border: 1px solid rgba(233, 69, 96, 0.15);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            font-family: inherit;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-delete::before {
+            content: "🗑";
+            font-size: 13px;
+        }
+
+        .btn-delete:hover {
+            background: var(--danger);
+            color: #fff;
+            border-color: var(--danger);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(233, 69, 96, 0.25);
+        }
+
+        /* ========== 添加按钮（提交） ========== */
+        .submit-btn {
+            width: 100%;
+            padding: 14px;
+            margin-top: 10px;
+            background: linear-gradient(135deg, var(--highlight) 0%, var(--accent) 100%);
+            color: #fff;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.3s ease;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        /* 添加按钮前面的图标 */
+        .submit-btn::before {
+            content: "✓";
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .submit-btn:hover {
+            opacity: 0.92;
+            transform: translateY(-1px);
+            box-shadow: 0 8px 24px rgba(15, 52, 96, 0.25);
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+
+        /* ========== 动画 ========== */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-6px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ========== 响应式 ========== */
+        @media (max-width: 600px) {
+            .form-card { padding: 28px; }
+            h2 { font-size: 20px; }
+            input[type="file"] { padding: 8px 10px; }
+        }
+
+    </style>
+</head>
+<body>
+<form th:action="@{/Madd}" method="post" enctype="multipart/form-data">
+    名称:<input type="text" name="pname">
+    价格:<input type="text" name="price">
+    新旧程度:<input type="text" name="stock">
+    图片:<input type="file" name="img" id="imgInput" accept="image/*"><br><br>
+    <div class="preview-box" id="previewBox">
+        <img id="previewImg" src="" alt="预览">
+        <button type="button" class="btn-delete" onclick="deleteImage()">删除图片</button>
+
+    </div>
+    <button type="submit">添加</button>
+</form>
+<script>
+    const imgInput = document.getElementById('imgInput');
+    const previewBox = document.getElementById('previewBox');
+    const previewImg = document.getElementById('previewImg');
+
+    // 当用户选中文件时触发
+    imgInput.addEventListener('change', function() {
+        const file = this.files[0];  // 取选中的第一个文件
+
+        if (file) {
+            // 生成一个本地临时链接，用来预览（不需要上传到服务器）
+            const url = URL.createObjectURL(file);
+            previewImg.src = url;
+
+            // 让预览区域显示出来
+            previewBox.classList.add('active');
+        }
+    });
+
+    // 删除已选择的图片
+    function deleteImage() {
+        // 1. 清空文件选择框（关键！这样提交时就不会带文件）
+        imgInput.value = '';
+
+        // 2. 释放浏览器临时占用的内存（防止泄漏，好习惯）
+        if (previewImg.src && previewImg.src.startsWith('blob:')) {
+            URL.revokeObjectURL(previewImg.src);
+        }
+
+        // 3. 清空预览图
+        previewImg.src = '';
+
+        // 4. 隐藏预览区域
+        previewBox.classList.remove('active');
+    }
+</script>
+
+</body>
+</html>

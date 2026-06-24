@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>编辑文创产品</title>
+</head>
+<body>
+<h1>编辑文创产品</h1>
+<form th:action="@{/Mupdate}" method="post">
+    <!-- 隐藏字段放产品ID -->
+    <input type="hidden" name="pid" th:value="${product.id}">
+
+    名称：<input type="text" name="pname" th:value="${product.title}"><br><br>
+    价格：<input type="text" name="price" th:value="${product.price}"><br><br>
+    新旧程度：<input type="text" name="stock" th:value="${product.condition}"><br><br>
+
+    <input type="submit" value="保存修改">
+</form>
+</body>
+</html>

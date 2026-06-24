@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+<form th:action="@{/upload}" method="post" enctype="multipart/form-data">
+    <input type="file" name="myfile">
+    <button>提交</button>
+
+</form>
+    <img th:src="@{${url}}" alt="">
+<a th:href="@{/delete(url=${url})}">删除</a>
+</body>
+</html>
