@@ -1,9 +1,10 @@
-package com.shumei.servlet;
+package com.shumei.servlet.UserServlet;
 
 import com.shumei.DAO.Impl.ProductDAOImpl;
 import com.shumei.DAO.ProductDAO;
 import com.shumei.pojo.Product;
 import com.shumei.pojo.User;
+import com.shumei.servlet.ViewBaseServlet;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
