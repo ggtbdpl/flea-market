@@ -1,10 +1,68 @@
 <!DOCTYPE html>
-<html lang="en">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
+    <meta charset="UTF-8">
+    <title>用户管理</title>
+    <link rel="stylesheet" th:href="@{/static/css/admin.css}">
 </head>
 <body>
-$END$
+<div class="admin-wrapper">
+    <aside class="sidebar">
+        <div class="logo"><h3>校园跳蚤市场</h3><span>后台管理系统</span></div>
+        <nav>
+            <ul>
+                <li><a th:href="@{/Mindex}">首页概览</a></li>
+                <li><a th:href="@{/Mindex}">商品管理</a></li>
+                <li><a th:href="@{/admin/category}">分类管理</a></li>
+                <li><a href="#" class="active">用户管理</a></li>
+                <li><a th:href="@{/admin/trade}">交易管理</a></li>
+                <li><a th:href="@{/admin/announcement}">公告管理</a></li>
+                <li><a href="#">留言管理</a></li>
+            </ul>
+        </nav>
+        <div class="logout"><a th:href="@{/logout}">退出登录</a></div>
+    </aside>
+
+    <main class="main-content">
+        <header class="top-bar"><span th:text="'欢迎，' + ${admin.username}">欢迎，管理员</span></header>
+        <div class="content-body">
+            <div class="page-header">
+                <h2>用户管理</h2>
+            </div>
+
+            <table class="data-table">
+                <thead>
+                <tr><th>ID</th><th>用户名</th><th>手机号</th><th>微信</th><th>头像</th><th>状态</th><th>注册时间</th><th>操作</th></tr>
+                </thead>
+                <tbody>
+                <tr th:each="u : ${userList}">
+                    <td th:text="${u.id}">1</td>
+                    <td th:text="${u.username}">user1</td>
+                    <td th:text="${u.phone}">13800138000</td>
+                    <td th:text="${u.wechat}">wx123</td>
+                    <td>
+                        <img th:if="${u.avatar != null}" th:src="@{${u.avatar}}" style="width:40px;height:40px;border-radius:50%;object-fit:cover;">
+                        <span th:if="${u.avatar == null}">无</span>
+                    </td>
+                    <td>
+                        <span th:if="${u.status == 1}" class="status-1">正常</span>
+                        <span th:if="${u.status != 1}" class="status-2">禁用</span>
+                    </td>
+                    <td th:text="${u.createTime}">2024-01-01</td>
+                    <td class="action-btns">
+                        <a th:href="@{/admin/user(action=toggle, id=${u.id}, status=${u.status})}"
+                           th:text="${u.status == 1} ? '禁用' : '启用'"
+                           th:class="${u.status == 1} ? 'delete' : ''"
+                           onclick="return confirm('确定要修改该用户状态吗？')">禁用</a>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(userList)}">
+                    <td colspan="8" style="text-align:center;padding:40px;color:#999;">暂无用户</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+</div>
 </body>
 </html>

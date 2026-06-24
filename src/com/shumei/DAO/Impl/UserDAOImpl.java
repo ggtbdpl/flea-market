@@ -5,6 +5,8 @@ import com.shumei.pojo.User;
 import com.shumei.util.DBUtil;
 
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class UserDAOImpl implements UserDAO {
 
@@ -116,5 +118,53 @@ public class UserDAOImpl implements UserDAO {
             DBUtil.close(conn, ps, rs);
         }
         return false;
+    }
+    @Override
+    public List<User> getAllUsers() {
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        List<User> list = new ArrayList<>();
+        try {
+            conn = DBUtil.getConnection();
+            String sql = "SELECT id, username, password, phone, wechat, avatar, status, create_time FROM user";
+            ps = conn.prepareStatement(sql);
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                User user = new User();
+                user.setId(rs.getInt("id"));
+                user.setUsername(rs.getString("username"));
+                user.setPassword(rs.getString("password"));
+                user.setPhone(rs.getString("phone"));
+                user.setWechat(rs.getString("wechat"));
+                user.setAvatar(rs.getString("avatar"));
+                user.setStatus(rs.getInt("status"));
+                user.setCreateTime(rs.getString("create_time"));
+                list.add(user);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            DBUtil.close(conn, ps, rs);
+        }
+        return list;
+    }
+    @Override
+    public boolean updateUserStatus(Integer id, Integer status) {
+        Connection conn = null;
+        PreparedStatement ps = null;
+        try {
+            conn = DBUtil.getConnection();
+            String sql = "UPDATE user SET status = ? WHERE id = ?";
+            ps = conn.prepareStatement(sql);
+            ps.setInt(1, status);
+            ps.setInt(2, id);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        } finally {
+            DBUtil.close(conn, ps, null);
+        }
     }
 }

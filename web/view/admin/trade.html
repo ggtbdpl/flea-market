@@ -1,10 +1,63 @@
 <!DOCTYPE html>
-<html lang="en">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
+    <meta charset="UTF-8">
+    <title>交易管理</title>
+    <link rel="stylesheet" th:href="@{/static/css/admin.css}">
 </head>
 <body>
-$END$
+<div class="admin-wrapper">
+    <aside class="sidebar">
+        <div class="logo"><h3>校园跳蚤市场</h3><span>后台管理系统</span></div>
+        <nav>
+            <ul>
+                <li><a th:href="@{/Mindex}">首页概览</a></li>
+                <li><a th:href="@{/Mindex}">商品管理</a></li>
+                <li><a th:href="@{/admin/category}">分类管理</a></li>
+                <li><a th:href="@{/admin/user}">用户管理</a></li>
+                <li><a href="#" class="active">交易管理</a></li>
+                <li><a th:href="@{/admin/announcement}">公告管理</a></li>
+                <li><a href="#">留言管理</a></li>
+            </ul>
+        </nav>
+        <div class="logout"><a th:href="@{/logout}">退出登录</a></div>
+    </aside>
+
+    <main class="main-content">
+        <header class="top-bar"><span th:text="'欢迎，' + ${admin.username}">欢迎，管理员</span></header>
+        <div class="content-body">
+            <div class="page-header">
+                <h2>交易管理</h2>
+            </div>
+
+            <table class="data-table">
+                <thead>
+                <tr><th>ID</th><th>商品ID</th><th>买家ID</th><th>卖家ID</th><th>状态</th><th>备注</th><th>创建时间</th><th>完成时间</th></tr>
+                </thead>
+                <tbody>
+                <tr th:each="t : ${tradeList}">
+                    <td th:text="${t.id}">1</td>
+                    <td th:text="${t.productId}">100</td>
+                    <td th:text="${t.buyerId}">2</td>
+                    <td th:text="${t.sellerId}">3</td>
+                    <td>
+                        <span th:if="${t.status == 'pending'}" class="status-2">待确认</span>
+                        <span th:if="${t.status == 'contacting'}" class="status-2">联系中</span>
+                        <span th:if="${t.status == 'trading'}" class="status-2">交易中</span>
+                        <span th:if="${t.status == 'completed'}" class="status-1">已完成</span>
+                        <span th:if="${t.status == 'cancelled'}" class="status-2">已取消</span>
+                    </td>
+                    <td th:text="${t.remark}">备注</td>
+                    <td th:text="${t.createTime}">2024-01-01</td>
+                    <td th:text="${t.completeTime}">2024-01-02</td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(tradeList)}">
+                    <td colspan="8" style="text-align:center;padding:40px;color:#999;">暂无交易记录</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+</div>
 </body>
 </html>
