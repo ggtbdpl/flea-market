@@ -6,6 +6,11 @@ import com.shumei.util.DBUtil;
 
 import java.math.BigDecimal;
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
 
 public class UserDAOImpl implements UserDAO {
 
@@ -42,7 +47,7 @@ public class UserDAOImpl implements UserDAO {
         ResultSet rs = null;
         try {
             conn = DBUtil.getConnection();
-            String sql = "SELECT id, username, password, nickname, phone, wechat, avatar, status, create_time FROM user WHERE username = ?";
+            String sql = "SELECT id, username, password, nickname, phone, wechat, avatar, status, balance, create_time FROM user WHERE username = ?";
             ps = conn.prepareStatement(sql);
             ps.setString(1, username);
             rs = ps.executeQuery();
@@ -56,6 +61,7 @@ public class UserDAOImpl implements UserDAO {
                 user.setWechat(rs.getString("wechat"));
                 user.setAvatar(rs.getString("avatar"));
                 user.setStatus(rs.getInt("status"));
+                user.setBalance(rs.getBigDecimal("balance"));
                 user.setCreateTime(rs.getString("create_time"));
 
                 return user;
@@ -139,6 +145,35 @@ public class UserDAOImpl implements UserDAO {
         }
         return java.math.BigDecimal.ZERO;
     }
+    @Override
+    public List<User> getAllUsers() {
+        String sql = "SELECT * FROM user";
+        List<User> list = new ArrayList<>();
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                list.add(mapRow(rs));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    @Override
+    public boolean updateUserStatus(Integer id, Integer status) {
+        String sql = "UPDATE user SET status = ? WHERE id = ?";
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, status);
+            ps.setInt(2, id);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 
     @Override
     public int updateBalance(Integer userId, java.math.BigDecimal amount) {
@@ -152,6 +187,21 @@ public class UserDAOImpl implements UserDAO {
             e.printStackTrace();
             return 0;
         }
+    }
+    private User mapRow(ResultSet rs) throws SQLException {
+        User user = new User();
+        user.setId(rs.getInt("id"));
+        user.setUsername(rs.getString("username"));
+        user.setPassword(rs.getString("password"));
+        user.setNickname(rs.getString("nickname"));
+        user.setPhone(rs.getString("phone"));
+        user.setWechat(rs.getString("wechat"));
+        user.setAvatar(rs.getString("avatar"));
+        user.setStatus(rs.getInt("status"));
+        user.setBalance(rs.getBigDecimal("balance"));
+        user.setCreateTime(rs.getString("create_time"));
+
+        return user;
     }
 
 }

@@ -1,17 +1,29 @@
 package com.shumei.util;
 
+import java.io.InputStream;
 import java.sql.*;
+import java.util.Properties;
 
 public class DBUtil {
-    private static final String url = "jdbc:mysql://127.0.0.1:3306/fleamarket?useSSL=false&useUnicode=true&characterEncoding=utf8";
-    private static final String user="root";
-    private static final String password="Jxl5201314..";
-    private static final String driver="com.mysql.jdbc.Driver";  // ← 改这里，去掉 .cj
+    private static String url = "jdbc:mysql://127.0.0.1:3306/fleamarket?useSSL=false&useUnicode=true&characterEncoding=utf8";
+    private static String user="root";
+    private static String password="Jxl5201314..";
+    private static String driver="com.mysql.jdbc.Driver";  // ← 改这里，去掉 .cj
 
     static {
         try {
+            // 读取 db.properties 配置文件
+            InputStream is = DBUtil.class.getClassLoader().getResourceAsStream("db.properties");
+            Properties props = new Properties();
+            props.load(is);
+
+            url= props.getProperty("url");
+            user = props.getProperty("username");
+            password = props.getProperty("password");
+            driver = props.getProperty("driver");
+
             Class.forName(driver);
-        } catch (ClassNotFoundException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }

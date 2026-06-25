@@ -376,7 +376,7 @@
 </footer>
 
 <script th:inline="javascript">
-    var productId = [[${product.id}]];
+    var productId = parseInt(document.getElementById('pid').value);
 
     function switchImage(thumb) {
         document.getElementById('mainImage').src = thumb.src;
@@ -387,7 +387,8 @@
     }
 
     function createTrade(pid) {
-        if (!confirm('确认购买？将扣除 ¥' + [[${product.price}]] + ' 虚拟货币')) return;
+        if (!confirm('确认购买？将扣除 ¥' + productPrice + ' 虚拟货币')) return;
+
         fetch('trade', {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -425,7 +426,7 @@
     function submitMessage() {
         var content = document.getElementById('msgContent').value.trim();
         if (!content) { alert('请输入留言内容'); return; }
-        fetch('message', {
+        fetch('api/message', {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             body: 'productId=' + productId + '&content=' + encodeURIComponent(content)
@@ -443,7 +444,7 @@
     function submitReply(msgId) {
         var content = document.getElementById('replyInput-' + msgId).value.trim();
         if (!content) { alert('请输入回复内容'); return; }
-        fetch('message', {
+        fetch('api/message', {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             body: 'productId=' + productId + '&replyId=' + msgId + '&replyContent=' + encodeURIComponent(content)

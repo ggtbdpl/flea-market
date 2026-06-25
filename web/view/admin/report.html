@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>举报管理</title>
+    <link rel="stylesheet" th:href="@{/static/css/admin.css}">
+    <style>
+        /* 表格列宽 */
+        .data-table th:nth-child(1),
+        .data-table td:nth-child(1) { width: 60px; text-align: center; }
+
+        .data-table th:nth-child(2),
+        .data-table td:nth-child(2) { width: 15%; text-align: center; }
+
+        .data-table th:nth-child(3),
+        .data-table td:nth-child(3) { width: 12%; text-align: center; }
+
+        .data-table th:nth-child(4),
+        .data-table td:nth-child(4) { width: 20%; text-align: left; padding-left: 20px; }
+
+        .data-table th:nth-child(5),
+        .data-table td:nth-child(5) { width: 10%; text-align: center; }
+
+        .data-table th:nth-child(6),
+        .data-table td:nth-child(6) { width: 15%; text-align: center; }
+
+        .data-table th:nth-child(7),
+        .data-table td:nth-child(7) { width: 15%; text-align: center; }
+
+        /* 状态标签 */
+        .status-tag {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 3px;
+            font-size: 12px;
+            border: 1px solid;
+        }
+        .status-0 { /* 待处理 */
+            color: #c0392b;
+            border-color: #e74c3c;
+            background: #fdf2f2;
+        }
+        .status-1 { /* 已处理 */
+            color: #27ae60;
+            border-color: #2ecc71;
+            background: #f2fdf5;
+        }
+        .status-2 { /* 已驳回 */
+            color: #7f8c8d;
+            border-color: #95a5a6;
+            background: #f5f5f5;
+        }
+
+        /* 操作按钮 */
+        .action-btns a {
+            padding: 3px 10px;
+            border-radius: 3px;
+            font-size: 13px;
+            text-decoration: none;
+            margin: 0 2px;
+            border: 1px solid;
+            transition: all 0.2s;
+        }
+        .action-btns a:hover { opacity: 0.8; }
+
+        .btn-handle {
+            color: #2980b9;
+            border-color: #3498db;
+            background: #f8fbfd;
+        }
+        .btn-handle:hover { background: #eaf2f8; }
+
+        .btn-reject {
+            color: #7f8c8d;
+            border-color: #95a5a6;
+            background: #f5f5f5;
+        }
+        .btn-reject:hover { background: #e8e8e8; }
+
+        /* 弹窗样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal.active { display: flex; }
+        .modal-content {
+            background: #fff;
+            padding: 24px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 12px;
+        }
+        .modal-close {
+            font-size: 24px;
+            color: #999;
+            cursor: pointer;
+            background: none;
+            border: none;
+        }
+        .form-group { margin-bottom: 16px; }
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 14px;
+            color: #555;
+        }
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            resize: vertical;
+            min-height: 80px;
+        }
+        .form-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+        .btn-secondary {
+            padding: 8px 16px;
+            border: 1px solid #ddd;
+            background: #fff;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .btn-primary {
+            padding: 8px 16px;
+            border: none;
+            background: #3498db;
+            color: #fff;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        /* 空数据 */
+        .empty-tip {
+            text-align: center;
+            padding: 80px 20px;
+            color: #999;
+        }
+        .empty-icon {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 16px;
+            background: #e8e8e8;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: #bbb;
+        }
+    </style>
+</head>
+<body>
+<div class="admin-wrapper">
+    <aside class="sidebar">
+        <div class="logo"><h3>校园跳蚤市场</h3><span>后台管理系统</span></div>
+        <nav>
+            <ul>
+                <li><a href="#">首页概览</a></li>
+                <li><a href="#">商品管理</a></li>
+                <li><a href="#">分类管理</a></li>
+                <li><a href="#">用户管理</a></li>
+                <li><a href="#">交易管理</a></li>
+                <li><a href="#">公告管理</a></li>
+                <li><a href="/fleamarket/admin/message">留言管理</a></li>
+                <li><a href="/fleamarket/admin/report" class="active">举报管理</a></li>
+            </ul>
+        </nav>
+        <div class="logout"><a href="#">退出登录</a></div>
+    </aside>
+
+    <main class="main-content">
+        <header class="top-bar"><span>欢迎，管理员</span></header>
+        <div class="content-body">
+            <div class="page-header">
+                <h2>举报管理</h2>
+            </div>
+
+            <!-- 有数据时显示表格 -->
+            <table class="data-table" th:if="${not #lists.isEmpty(reportList)}">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>被举报商品</th>
+                    <th>举报人</th>
+                    <th>举报原因</th>
+                    <th>状态</th>
+                    <th>时间</th>
+                    <th>操作</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="r : ${reportList}">
+                    <td th:text="${r.id}">1</td>
+                    <td th:text="${r.productName}">商品名称</td>
+                    <td th:text="${r.reporterName}">举报人</td>
+                    <td th:text="${r.reason}">虚假商品</td>
+                    <td>
+                        <span th:if="${r.status == 0}" class="status-tag status-0">待处理</span>
+                        <span th:if="${r.status == 1}" class="status-tag status-1">已处理</span>
+                        <span th:if="${r.status == 2}" class="status-tag status-2">已驳回</span>
+                    </td>
+                    <td th:text="${#dates.format(r.createTime, 'yyyy-MM-dd HH:mm')}">2024-01-01</td>
+                    <td class="action-btns">
+                        <a th:if="${r.status == 0}" href="javascript:void(0)" class="btn-handle"
+                           th:attr="data-id=${r.id}, data-reason=${r.reason}, data-detail=${r.detail}"
+                           onclick="openHandleModal(this)">处理</a>
+                        <a th:if="${r.status == 0}" th:href="@{/admin/report(action='reject', reportId=${r.id})}"
+                           class="btn-reject" onclick="return confirm('确定驳回这条举报？')">驳回</a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+
+            <!-- 无数据时显示提示 -->
+            <div class="empty-tip" th:if="${#lists.isEmpty(reportList)}">
+                <div class="empty-icon">!</div>
+                <div>暂无举报数据</div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- 处理弹窗 -->
+<div id="handleModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>处理举报</h3>
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+        </div>
+        <form id="handleForm" th:action="@{/admin/report}" method="post">
+            <input type="hidden" name="action" value="handle">
+            <input type="hidden" name="reportId" id="handleReportId">
+
+            <div class="form-group">
+                <label>举报原因</label>
+                <div id="showReason" style="padding:10px;background:#f5f5f5;border-radius:4px;color:#666;font-size:13px;"></div>
+            </div>
+
+            <div class="form-group">
+                <label>详细说明</label>
+                <div id="showDetail" style="padding:10px;background:#f5f5f5;border-radius:4px;color:#666;font-size:13px;min-height:40px;"></div>
+            </div>
+
+            <div class="form-group">
+                <label>处理回复</label>
+                <textarea name="adminReply" placeholder="请输入处理结果..." required></textarea>
+            </div>
+
+            <div class="form-actions">
+                <button type="button" class="btn-secondary" onclick="closeModal()">取消</button>
+                <button type="submit" class="btn-primary">确认处理</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function openHandleModal(link) {
+        document.getElementById('handleReportId').value = link.getAttribute('data-id');
+        document.getElementById('showReason').textContent = link.getAttribute('data-reason');
+        document.getElementById('showDetail').textContent = link.getAttribute('data-detail') || '无详细说明';
+        document.getElementById('handleModal').classList.add('active');
+    }
+
+    function closeModal() {
+        document.getElementById('handleModal').classList.remove('active');
+    }
+
+    // 点击弹窗外部关闭
+    document.getElementById('handleModal').addEventListener('click', function(e) {
+        if (e.target === this) closeModal();
+    });
+</script>
+</body>
+</html>

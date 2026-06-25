@@ -1,4 +1,4 @@
-package com.shumei.servlet;
+package com.shumei.servlet.UserServlet;
 
 import com.shumei.DAO.Impl.ProductDAOImpl;
 import com.shumei.DAO.Impl.TradeDAOImpl;

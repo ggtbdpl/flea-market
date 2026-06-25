@@ -121,6 +121,22 @@ public class TradeDAOImpl implements TradeDAO {
             return 0;
         }
     }
+    @Override
+    public List<Trade> getAllTrades() {
+        String sql = "SELECT * FROM trade ORDER BY create_time DESC";
+        List<Trade> list = new ArrayList<>();
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                list.add(mapRow(rs));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
 
     private Trade mapRow(ResultSet rs) throws SQLException {
         Trade trade = new Trade();

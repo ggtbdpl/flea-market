@@ -4,20 +4,18 @@ import com.shumei.DAO.AdminDAO;
 import com.shumei.pojo.Admin;
 import com.shumei.util.DBUtil;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 
 public class AdminDAOImpl implements AdminDAO {
 
     @Override
     public Admin getAdminUser(String username, String password) {
-        Admin admin = null;
-        String sql = "select * from admin where username=? and password=?";
         Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
+
+        // 注意：字段名改成和数据库表一致
+        String sql = "SELECT id, username, password, nickname, create_time FROM admin WHERE username = ? AND password = ?";
 
         try {
             conn = DBUtil.getConnection();
@@ -27,17 +25,20 @@ public class AdminDAOImpl implements AdminDAO {
             rs = ps.executeQuery();
 
             if (rs.next()) {
-                admin = new Admin();
-                admin.setAdminID(rs.getInt("adminID"));
+                Admin admin = new Admin();
+                admin.setId(rs.getInt("id"));  // 原来是 adminID
                 admin.setUsername(rs.getString("username"));
                 admin.setPassword(rs.getString("password"));
-                admin.setRole(rs.getInt("role"));
+                admin.setNickname(rs.getString("nickname"));
+                admin.setCreateTime(rs.getTimestamp("create_time"));
+                return admin;
             }
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
         } finally {
             DBUtil.close(conn, ps, rs);
         }
-        return admin;
+
+        return null;
     }
 }

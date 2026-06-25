@@ -9,6 +9,8 @@ public interface TradeDAO {
     Trade getTradeByProductAndBuyer(Integer productId, Integer buyerId);
     List<Trade> getTradesBySellerId(Integer sellerId);
     List<Trade> getTradesByBuyerId(Integer buyerId);
+    List<Trade> getAllTrades();
+
     int updateTradeStatus(Integer id, String status);
     int updateTradeCompleteTime(Integer id);
 }

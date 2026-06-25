@@ -5,6 +5,11 @@ import java.util.List;
 
 public interface MessageDAO {
     List<Message> getMessagesByProductId(Integer productId);
-    int addMessage(Message message);
+    boolean addMessage(Message message);
     int replyMessage(Integer id, String replyContent);
+
+    // 组员新增
+    List<Message> getAllMessages();
+    boolean deleteMessage(Integer id);
+    boolean markAsRead(Integer id);
 }

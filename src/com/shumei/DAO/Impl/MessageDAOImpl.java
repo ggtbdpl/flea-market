@@ -28,19 +28,21 @@ public class MessageDAOImpl implements MessageDAO {
     }
 
     @Override
-    public int addMessage(Message message) {
-        String sql = "INSERT INTO message (product_id, from_user_id, content) VALUES (?, ?, ?)";
+    public boolean addMessage(Message message) {
+        String sql = "INSERT INTO message (product_id, from_user_id, to_user_id, content) VALUES (?, ?, ?, ?)";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, message.getProductId());
             ps.setInt(2, message.getFromUserId());
-            ps.setString(3, message.getContent());
-            return ps.executeUpdate();
+            ps.setInt(3, message.getToUserId() != null ? message.getToUserId() : 0);
+            ps.setString(4, message.getContent());
+            return ps.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
-            return 0;
+            return false;
         }
     }
+
 
     @Override
     public int replyMessage(Integer id, String replyContent) {
@@ -55,14 +57,60 @@ public class MessageDAOImpl implements MessageDAO {
             return 0;
         }
     }
+    @Override
+    public List<Message> getAllMessages() {
+        String sql = "SELECT * FROM message ORDER BY create_time DESC";
+        List<Message> list = new ArrayList<>();
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                list.add(mapRow(rs));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    @Override
+    public boolean deleteMessage(Integer id) {
+        String sql = "DELETE FROM message WHERE id = ?";
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+
+    @Override
+    public boolean markAsRead(Integer id) {
+        String sql = "UPDATE message SET is_read = 1 WHERE id = ?";
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+
 
     private Message mapRow(ResultSet rs) throws SQLException {
         Message msg = new Message();
         msg.setId(rs.getInt("id"));
         msg.setProductId(rs.getInt("product_id"));
         msg.setFromUserId(rs.getInt("from_user_id"));
+        msg.setToUserId(rs.getInt("to_user_id"));  // 新增
         msg.setContent(rs.getString("content"));
         msg.setReplyContent(rs.getString("reply_content"));
+        msg.setIsRead(rs.getInt("is_read"));  // 新增
         Timestamp replyTime = rs.getTimestamp("reply_time");
         if (replyTime != null) {
             msg.setReplyTime(replyTime.toLocalDateTime());
@@ -70,4 +118,5 @@ public class MessageDAOImpl implements MessageDAO {
         msg.setCreateTime(rs.getTimestamp("create_time").toLocalDateTime());
         return msg;
     }
+
 }

@@ -81,8 +81,8 @@ public class MessageServlet extends HttpServlet {
             msg.setProductId(productId);
             msg.setFromUserId(user.getId());
             msg.setContent(content.trim());
-            int result = messageDAO.addMessage(msg);
-            if (result > 0) {
+            boolean result = messageDAO.addMessage(msg);
+            if (result) {
                 out.print("{\"success\":true,\"msg\":\"发表成功\"}");
             } else {
                 out.print("{\"success\":false,\"msg\":\"发表失败\"}");
