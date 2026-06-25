@@ -107,10 +107,8 @@ public class MessageDAOImpl implements MessageDAO {
         msg.setId(rs.getInt("id"));
         msg.setProductId(rs.getInt("product_id"));
         msg.setFromUserId(rs.getInt("from_user_id"));
-        msg.setToUserId(rs.getInt("to_user_id"));  // 新增
         msg.setContent(rs.getString("content"));
         msg.setReplyContent(rs.getString("reply_content"));
-        msg.setIsRead(rs.getInt("is_read"));  // 新增
         Timestamp replyTime = rs.getTimestamp("reply_time");
         if (replyTime != null) {
             msg.setReplyTime(replyTime.toLocalDateTime());

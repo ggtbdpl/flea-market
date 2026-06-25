@@ -21,8 +21,6 @@ public class ProductDAOImpl implements ProductDAO {
         ResultSet rs = null;
         try {
             conn = DBUtil.getConnection();
-
-
             String sql = "SELECT id, title, category_id, price, original_price, `condition`, description, image, images, contact, user_id, status, create_time, update_time FROM product WHERE status = 1";
             ps = conn.prepareStatement(sql);
             rs = ps.executeQuery();
@@ -51,8 +49,43 @@ public class ProductDAOImpl implements ProductDAO {
             System.out.println("SQL Error: " + e.getMessage());
             System.out.println("Connection: " + conn);
         } finally {
+            DBUtil.close(conn, ps, rs);
+        }
+        return list;
+    }
 
-
+    @Override
+    public ArrayList<Product> getAllProducts() {
+        ArrayList<Product> list = new ArrayList<>();
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        try {
+            conn = DBUtil.getConnection();
+            String sql = "SELECT id, title, category_id, price, original_price, `condition`, description, image, images, contact, user_id, status, create_time, update_time FROM product";
+            ps = conn.prepareStatement(sql);
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                Product p = new Product();
+                p.setId(rs.getInt("id"));
+                p.setTitle(rs.getString("title"));
+                p.setCategoryId(rs.getInt("category_id"));
+                p.setPrice(rs.getBigDecimal("price"));
+                p.setOriginalPrice(rs.getBigDecimal("original_price"));
+                p.setCondition(rs.getString("condition"));
+                p.setDescription(rs.getString("description"));
+                p.setImage(rs.getString("image"));
+                p.setImages(rs.getString("images"));
+                p.setContact(rs.getString("contact"));
+                p.setUserId(rs.getInt("user_id"));
+                p.setStatus(rs.getInt("status"));
+                p.setCreateTime(rs.getString("create_time"));
+                p.setUpdateTime(rs.getString("update_time"));
+                list.add(p);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
             DBUtil.close(conn, ps, rs);
         }
         return list;
@@ -172,7 +205,13 @@ public class ProductDAOImpl implements ProductDAO {
             ps.setString(1, product.getTitle());
             ps.setInt(2, product.getCategoryId() != null ? product.getCategoryId() : 0);
             ps.setBigDecimal(3, product.getPrice());
-            ps.setBigDecimal(4, product.getOriginalPrice());
+
+            if (product.getOriginalPrice() != null) {
+                ps.setBigDecimal(4, product.getOriginalPrice());
+            } else {
+                ps.setNull(4, java.sql.Types.DECIMAL);
+            }
+
             ps.setString(5, product.getCondition());
             ps.setString(6, product.getDescription());
             ps.setString(7, product.getImage());
@@ -181,9 +220,13 @@ public class ProductDAOImpl implements ProductDAO {
             ps.setInt(10, product.getUserId() != null ? product.getUserId() : 0);
             ps.setInt(11, product.getStatus() != null ? product.getStatus() : 0);
             ps.setInt(12, product.getId());
-            return ps.executeUpdate() > 0;
+
+            int rows = ps.executeUpdate();
+            System.out.println("DAO updateProduct affected rows: " + rows + ", status=" + product.getStatus());
+            return rows > 0;
         } catch (SQLException e) {
             e.printStackTrace();
+            System.out.println("DAO updateProduct error: " + e.getMessage());
             return false;
         } finally {
             DBUtil.close(conn, ps, null);
@@ -221,5 +264,4 @@ public class ProductDAOImpl implements ProductDAO {
             return 0;
         }
     }
-
 }

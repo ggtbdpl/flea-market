@@ -24,24 +24,6 @@
             padding-left: 20px;
         }
 
-        .status-tag {
-            display: inline-block;
-            padding: 3px 10px;
-            border-radius: 3px;
-            font-size: 12px;
-            border: 1px solid;
-        }
-        .status-unread {
-            color: #c0392b;
-            border-color: #e74c3c;
-            background: #fdf2f2;
-        }
-        .status-read {
-            color: #27ae60;
-            border-color: #2ecc71;
-            background: #f2fdf5;
-        }
-
         .action-btns {
             white-space: nowrap;
         }
@@ -58,12 +40,12 @@
             opacity: 0.8;
         }
 
-        .btn-read {
+        .btn-view {
             color: #2980b9;
             border-color: #3498db;
             background: #f8fbfd;
         }
-        .btn-read:hover {
+        .btn-view:hover {
             background: #eaf2f8;
         }
 
@@ -109,10 +91,9 @@
                     <th style="width: 8%;">ID</th>
                     <th style="width: 12%;">商品</th>
                     <th style="width: 12%;">留言用户</th>
-                    <th style="width: 30%;">内容</th>
-                    <th style="width: 10%;">状态</th>
-                    <th style="width: 15%;">时间</th>
-                    <th style="width: 13%;">操作</th>
+                    <th style="width: 35%;">内容</th>
+                    <th style="width: 18%;">时间</th>
+                    <th style="width: 15%;">操作</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -121,18 +102,14 @@
                     <td th:text="${msg.productId}">1</td>
                     <td th:text="${msg.fromUserId}">2</td>
                     <td class="content-cell" th:text="${msg.content}" th:title="${msg.content}">留言内容</td>
-                    <td>
-                        <span th:if="${msg.isRead == 0}" class="status-tag status-unread">未读</span>
-                        <span th:if="${msg.isRead == 1}" class="status-tag status-read">已读</span>
-                    </td>
-                    <td th:text="${#dates.format(msg.createTime, 'yyyy-MM-dd HH:mm')}">2024-01-01</td>
+                    <td th:text="${msg.createTime}">2024-01-01</td>
                     <td class="action-btns">
-                        <a th:if="${msg.isRead == 0}" th:href="@{/admin/message(action='read', messageId=${msg.id})}" class="btn-read">标记已读</a>
+                        <a th:href="@{/admin/message/detail(productId=${msg.productId})}" class="btn-view">查看详情</a>
                         <a th:href="@{/admin/message(action='delete', messageId=${msg.id})}" class="delete" onclick="return confirm('确定删除？')">删除</a>
                     </td>
                 </tr>
                 <tr th:if="${#lists.isEmpty(messageList)}">
-                    <td colspan="7" style="text-align:center;padding:40px;color:#999;">暂无留言数据</td>
+                    <td colspan="6" style="text-align:center;padding:40px;color:#999;">暂无留言数据</td>
                 </tr>
                 </tbody>
             </table>

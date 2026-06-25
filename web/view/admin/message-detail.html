@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>留言详情 - 校园跳蚤市场</title>
+    <link rel="stylesheet" th:href="@{/static/css/admin.css}">
+    <style>
+        .chat-container {
+            background: #fff;
+            border-radius: 8px;
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+        .product-info {
+            padding: 16px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            margin-bottom: 24px;
+        }
+        .product-info h3 {
+            margin: 0;
+            color: #333;
+            font-size: 16px;
+        }
+        .product-info p {
+            margin: 8px 0 0;
+            color: #666;
+            font-size: 14px;
+        }
+        .msg-item {
+            padding: 16px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .msg-item:last-child {
+            border-bottom: none;
+        }
+        .msg-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        .msg-user {
+            font-weight: bold;
+            color: #0a8c7f;
+            font-size: 14px;
+        }
+        .msg-time {
+            color: #999;
+            font-size: 13px;
+        }
+        .msg-content {
+            color: #333;
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+        .msg-reply {
+            margin-top: 10px;
+            padding: 12px;
+            background: rgba(10,140,127,0.05);
+            border-left: 3px solid #0a8c7f;
+            border-radius: 0 6px 6px 0;
+        }
+        .msg-reply-label {
+            font-size: 12px;
+            color: #0a8c7f;
+            margin-bottom: 4px;
+        }
+        .msg-reply-content {
+            font-size: 13px;
+            color: #555;
+        }
+        .back-btn {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 8px 20px;
+            background: #f5f5f5;
+            color: #333;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        .back-btn:hover {
+            background: #e0e0e0;
+        }
+        .empty-tip {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+<div class="admin-wrapper">
+    <aside class="sidebar">
+        <div class="logo"><h3>校园跳蚤市场</h3><span>后台管理系统</span></div>
+        <nav>
+            <ul>
+                <li><a th:href="@{/admin/home}">首页概览</a></li>
+                <li><a th:href="@{/admin/product}">商品管理</a></li>
+                <li><a th:href="@{/admin/category}">分类管理</a></li>
+                <li><a th:href="@{/admin/user}">用户管理</a></li>
+                <li><a th:href="@{/admin/trade}">交易管理</a></li>
+                <li><a th:href="@{/admin/announcement}">公告管理</a></li>
+                <li><a th:href="@{/admin/message}" class="active">留言管理</a></li>
+                <li><a th:href="@{/admin/report}">举报管理</a></li>
+            </ul>
+        </nav>
+        <div class="logout"><a th:href="@{/logout}">退出登录</a></div>
+    </aside>
+
+    <main class="main-content">
+        <header class="top-bar"><span>欢迎，管理员</span></header>
+        <div class="content-body">
+            <div class="page-header">
+                <h2>留言详情</h2>
+            </div>
+
+            <div class="chat-container">
+                <div class="product-info" th:if="${product != null}">
+                    <h3 th:text="'商品：' + ${product.title}">商品标题</h3>
+                    <p th:text="'商品ID：' + ${product.id}">商品ID</p>
+                </div>
+
+                <div th:if="${not #lists.isEmpty(messages)}">
+                    <div class="msg-item" th:each="msg : ${messages}">
+                        <div class="msg-header">
+                            <span class="msg-user" th:text="'用户 ' + ${msg.fromUserId}">用户 2</span>
+                            <span class="msg-time" th:text="${msg.createTime}">2024-01-01</span>
+                        </div>
+                        <div class="msg-content" th:text="${msg.content}">留言内容</div>
+                        <div class="msg-reply" th:if="${msg.replyContent != null}">
+                            <div class="msg-reply-label">管理员回复</div>
+                            <div class="msg-reply-content" th:text="${msg.replyContent}">回复内容</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="empty-tip" th:if="${#lists.isEmpty(messages)}">
+                    该商品暂无留言
+                </div>
+
+                <a th:href="@{/admin/message}" class="back-btn">← 返回留言列表</a>
+            </div>
+        </div>
+    </main>
+</div>
+</body>
+</html>

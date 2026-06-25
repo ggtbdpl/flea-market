@@ -102,7 +102,7 @@
 
             <!-- 搜索栏 -->
             <div class="search-bar">
-                <form th:action="@{/Mindex}" method="post" style="display:flex;gap:12px;width:100%;">
+                <form th:action="@{/admin/product}" method="post" style="display:flex;gap:12px;width:100%;">
                     <input type="text" name="keyword" th:value="${keyword}" placeholder="搜索商品标题...">
                     <button type="submit">搜索</button>
                 </form>
@@ -135,3 +135,22 @@
                         <span th:if="${p.status == 1}" class="status-tag status-1">上架</span>
                         <span th:if="${p.status != 1}" class="status-tag status-0">下架</span>
                     </td>
+                    <td th:text="${p.contact}">微信:test</td>
+                    <td class="action-btns">
+                        <a th:href="@{/Medit(pid=${p.id})}" class="btn-edit">编辑</a>
+                        <a th:href="@{/Mdetail(pid=${p.id})}" class="btn-edit">详情</a>
+                        <a th:href="@{/admin/product(action='del', id=${p.id})}" class="btn-delete" onclick="return confirm('确定删除该商品？')">删除</a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+
+            <!-- 无数据时显示提示 -->
+            <div class="empty-tip" th:if="${#lists.isEmpty(products)}">
+                暂无商品数据
+            </div>
+        </div>
+    </main>
+</div>
+</body>
+</html>
