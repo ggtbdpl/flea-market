@@ -21,9 +21,13 @@ public class ProductDAOImpl implements ProductDAO {
         ResultSet rs = null;
         try {
             conn = DBUtil.getConnection();
+
+
             String sql = "SELECT id, title, category_id, price, original_price, `condition`, description, image, images, contact, user_id, status, create_time, update_time FROM product WHERE status = 1";
             ps = conn.prepareStatement(sql);
             rs = ps.executeQuery();
+            System.out.println("Connected DB: " + conn.getCatalog());
+            System.out.println("SQL: " + sql);
             while (rs.next()) {
                 Product p = new Product();
                 p.setId(rs.getInt("id"));
@@ -44,7 +48,11 @@ public class ProductDAOImpl implements ProductDAO {
             }
         } catch (SQLException e) {
             e.printStackTrace();
+            System.out.println("SQL Error: " + e.getMessage());
+            System.out.println("Connection: " + conn);
         } finally {
+
+
             DBUtil.close(conn, ps, rs);
         }
         return list;

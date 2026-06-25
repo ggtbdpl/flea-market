@@ -23,12 +23,26 @@ public class IndexServlet extends ViewBaseServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        try {
+            java.sql.Connection conn = com.shumei.util.DBUtil.getConnection();
+            java.sql.DatabaseMetaData meta = conn.getMetaData();
+            System.out.println("===== DB INFO =====");
+            System.out.println("URL: " + meta.getURL());
+            System.out.println("Catalog: " + conn.getCatalog());
+            conn.close();
+            System.out.println("===================");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         List<Category> categoryList = categoryDAO.getAll();
         req.setAttribute("categoryList", categoryList);
 
         ArrayList<Product> productList = productDAO.getProductList();
+        System.out.println("productList size: " + productList.size());
         req.setAttribute("productList", productList);
 
         processTemplate("index", req, resp);
     }
 }
+
