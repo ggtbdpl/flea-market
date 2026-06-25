@@ -180,7 +180,7 @@
                 <div class="image-section">
                     <div class="image-card">
                         <img th:if="${product.image != null and product.image != ''}"
-                             th:src="${product.image.startsWith('/')} ? @{${product.image}} : @{'/static/images/' + ${product.image}}"
+                             th:src="${product.image.startsWith('/')} ? ${product.image} : '/static/images/' + ${product.image}"
                              th:alt="${product.title}">
                         <div class="no-img" th:if="${product.image == null or product.image == ''}">暂无图片</div>
                     </div>
@@ -203,6 +203,11 @@
                         <div class="info-row">
                             <span class="label">成色</span>
                             <span class="value" th:text="${product.condition}">9成新</span>
+                        </div>
+
+                        <div class="info-row">
+                            <span class="label">标签</span>
+                            <span class="value" th:text="${product.tags}">标签</span>
                         </div>
 
                         <div class="info-row">

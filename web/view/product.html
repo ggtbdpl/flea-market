@@ -269,9 +269,11 @@
                 <button th:if="${currentUser != null and product.userId != null and product.userId == currentUser.id}" class="btn btn-secondary" disabled>我的商品</button>
 
                 <!-- 上架中，可购买 -->
-                <button th:if="${currentUser != null and product.userId != null and product.userId != currentUser.id and product.status == 1}"
-                        class="btn btn-primary" th:onclick="createTrade()">立即购买</button>
-
+                <form th:action="@{/trade}" method="post" style="margin:0;">
+                    <input type="hidden" name="action" value="create">
+                    <input type="hidden" name="productId" th:value="${product.id}">
+                    <button type="submit" class="btn-buy">立即购买</button>
+                </form>
                 <!-- 已售出 -->
                 <div th:if="${product.status == 3}" style="width:100%;">
                     <button th:if="${currentTrade == null}" class="btn btn-secondary" disabled>已售出</button>

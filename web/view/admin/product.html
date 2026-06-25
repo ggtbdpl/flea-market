@@ -118,6 +118,7 @@
                     <th>价格</th>
                     <th>原价</th>
                     <th>成色</th>
+                    <th>标签</th>
                     <th>状态</th>
                     <th>联系人</th>
                     <th>操作</th>
@@ -131,6 +132,7 @@
                     <td th:text="'¥' + ${p.price}">10.00</td>
                     <td th:text="'¥' + ${p.originalPrice}">30.00</td>
                     <td th:text="${p.condition}">九成新</td>
+                    <td th:text="${p.tags}">标签</td>
                     <td>
                         <span th:if="${p.status == 1}" class="status-tag status-1">上架</span>
                         <span th:if="${p.status != 1}" class="status-tag status-0">下架</span>

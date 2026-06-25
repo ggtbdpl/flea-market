@@ -63,15 +63,18 @@ public class TradeDAOImpl implements TradeDAO {
 
     @Override
     public List<Trade> getTradesBySellerId(Integer sellerId) {
-        String sql = "SELECT * FROM trade WHERE seller_id = ? ORDER BY create_time DESC";
+        String sql = "SELECT t.*, p.title as product_title, p.image as product_image FROM trade t LEFT JOIN product p ON t.product_id = p.id WHERE t.seller_id = ? ORDER BY t.create_time DESC";
         List<Trade> list = new ArrayList<>();
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, sellerId);
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
-                list.add(mapRow(rs));
+                Trade trade = mapRow(rs);
+                trade.setProductTitle(rs.getString("product_title"));
+                list.add(trade);
             }
+
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -80,15 +83,19 @@ public class TradeDAOImpl implements TradeDAO {
 
     @Override
     public List<Trade> getTradesByBuyerId(Integer buyerId) {
-        String sql = "SELECT * FROM trade WHERE buyer_id = ? ORDER BY create_time DESC";
+        String sql = "SELECT t.*, p.title as product_title, p.image as product_image FROM trade t LEFT JOIN product p ON t.product_id = p.id WHERE t.buyer_id = ? ORDER BY t.create_time DESC";
+
         List<Trade> list = new ArrayList<>();
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, buyerId);
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
-                list.add(mapRow(rs));
+                Trade trade = mapRow(rs);
+                trade.setProductImage(rs.getString("product_image"));
+                list.add(trade);
             }
+
         } catch (SQLException e) {
             e.printStackTrace();
         }

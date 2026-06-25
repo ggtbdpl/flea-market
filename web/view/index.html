@@ -2368,10 +2368,11 @@
     </div>
 
 
-    <div class="search">
-        <input type="text" placeholder="搜索书籍、电子产品、生活用品...">
-        <button type="button">搜索</button>
-    </div>
+    <form th:action="@{/search}" method="get" class="search">
+        <input type="text" name="keyword" placeholder="搜索书籍、电子产品、生活用品..." th:value="${keyword}">
+        <button type="submit">搜索</button>
+    </form>
+
 
     <div class="top-menu">
         <button type="button" class="theme-toggle" id="themeToggle" title="切换夜间模式">

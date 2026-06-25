@@ -21,11 +21,9 @@ public class ProductDAOImpl implements ProductDAO {
         ResultSet rs = null;
         try {
             conn = DBUtil.getConnection();
-            String sql = "SELECT id, title, category_id, price, original_price, `condition`, description, image, images, contact, user_id, status, create_time, update_time FROM product WHERE status = 1";
+            String sql = "SELECT id, title, category_id, price, original_price, `condition`, description, image, images, contact, user_id, status, tags, create_time, update_time FROM product WHERE status = 1";
             ps = conn.prepareStatement(sql);
             rs = ps.executeQuery();
-            System.out.println("Connected DB: " + conn.getCatalog());
-            System.out.println("SQL: " + sql);
             while (rs.next()) {
                 Product p = new Product();
                 p.setId(rs.getInt("id"));
@@ -40,14 +38,13 @@ public class ProductDAOImpl implements ProductDAO {
                 p.setContact(rs.getString("contact"));
                 p.setUserId(rs.getInt("user_id"));
                 p.setStatus(rs.getInt("status"));
+                p.setTags(rs.getString("tags"));
                 p.setCreateTime(rs.getString("create_time"));
                 p.setUpdateTime(rs.getString("update_time"));
                 list.add(p);
             }
         } catch (SQLException e) {
             e.printStackTrace();
-            System.out.println("SQL Error: " + e.getMessage());
-            System.out.println("Connection: " + conn);
         } finally {
             DBUtil.close(conn, ps, rs);
         }
@@ -62,7 +59,7 @@ public class ProductDAOImpl implements ProductDAO {
         ResultSet rs = null;
         try {
             conn = DBUtil.getConnection();
-            String sql = "SELECT id, title, category_id, price, original_price, `condition`, description, image, images, contact, user_id, status, create_time, update_time FROM product";
+            String sql = "SELECT id, title, category_id, price, original_price, `condition`, description, image, images, contact, user_id, status, tags, create_time, update_time FROM product";
             ps = conn.prepareStatement(sql);
             rs = ps.executeQuery();
             while (rs.next()) {
@@ -79,6 +76,7 @@ public class ProductDAOImpl implements ProductDAO {
                 p.setContact(rs.getString("contact"));
                 p.setUserId(rs.getInt("user_id"));
                 p.setStatus(rs.getInt("status"));
+                p.setTags(rs.getString("tags"));
                 p.setCreateTime(rs.getString("create_time"));
                 p.setUpdateTime(rs.getString("update_time"));
                 list.add(p);
@@ -99,7 +97,7 @@ public class ProductDAOImpl implements ProductDAO {
         Product p = null;
         try {
             conn = DBUtil.getConnection();
-            String sql = "SELECT id, title, category_id, price, original_price, `condition`, description, image, images, contact, user_id, status, create_time, update_time FROM product WHERE id = ?";
+            String sql = "SELECT id, title, category_id, price, original_price, `condition`, description, image, images, contact, user_id, status, tags, create_time, update_time FROM product WHERE id = ?";
             ps = conn.prepareStatement(sql);
             ps.setInt(1, id);
             rs = ps.executeQuery();
@@ -117,6 +115,7 @@ public class ProductDAOImpl implements ProductDAO {
                 p.setContact(rs.getString("contact"));
                 p.setUserId(rs.getInt("user_id"));
                 p.setStatus(rs.getInt("status"));
+                p.setTags(rs.getString("tags"));
                 p.setCreateTime(rs.getString("create_time"));
                 p.setUpdateTime(rs.getString("update_time"));
             }
@@ -136,7 +135,7 @@ public class ProductDAOImpl implements ProductDAO {
         ResultSet rs = null;
         try {
             conn = DBUtil.getConnection();
-            String sql = "SELECT id, title, category_id, price, original_price, `condition`, description, image, images, contact, user_id, status, create_time, update_time FROM product WHERE title LIKE ? AND status = 1";
+            String sql = "SELECT id, title, category_id, price, original_price, `condition`, description, image, images, contact, user_id, status, tags, create_time, update_time FROM product WHERE title LIKE ? AND status = 1";
             ps = conn.prepareStatement(sql);
             ps.setString(1, "%" + keyword + "%");
             rs = ps.executeQuery();
@@ -154,9 +153,196 @@ public class ProductDAOImpl implements ProductDAO {
                 p.setContact(rs.getString("contact"));
                 p.setUserId(rs.getInt("user_id"));
                 p.setStatus(rs.getInt("status"));
+                p.setTags(rs.getString("tags"));
                 p.setCreateTime(rs.getString("create_time"));
                 p.setUpdateTime(rs.getString("update_time"));
                 list.add(p);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            DBUtil.close(conn, ps, rs);
+        }
+        return list;
+    }
+
+    @Override
+    public ArrayList<Product> getProductByKeywordAndTag(String keyword, String tag, String sort) {
+        ArrayList<Product> list = new ArrayList<>();
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        try {
+            conn = DBUtil.getConnection();
+            StringBuilder sql = new StringBuilder(
+                    "SELECT id, title, category_id, price, original_price, `condition`, description, image, images, contact, user_id, status, tags, create_time, update_time FROM product WHERE status = 1"
+            );
+            if (keyword != null && !keyword.trim().isEmpty()) {
+                sql.append(" AND title LIKE ?");
+            }
+            if (tag != null && !tag.trim().isEmpty()) {
+                sql.append(" AND tags LIKE ?");
+            }
+            if ("price_asc".equals(sort)) {
+                sql.append(" ORDER BY price ASC");
+            } else if ("price_desc".equals(sort)) {
+                sql.append(" ORDER BY price DESC");
+            } else if ("newest".equals(sort)) {
+                sql.append(" ORDER BY create_time DESC");
+            } else {
+                sql.append(" ORDER BY id DESC");
+            }
+            ps = conn.prepareStatement(sql.toString());
+            int idx = 1;
+            if (keyword != null && !keyword.trim().isEmpty()) {
+                ps.setString(idx++, "%" + keyword.trim() + "%");
+            }
+            if (tag != null && !tag.trim().isEmpty()) {
+                ps.setString(idx++, "%" + tag.trim() + "%");
+            }
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                Product p = new Product();
+                p.setId(rs.getInt("id"));
+                p.setTitle(rs.getString("title"));
+                p.setCategoryId(rs.getInt("category_id"));
+                p.setPrice(rs.getBigDecimal("price"));
+                p.setOriginalPrice(rs.getBigDecimal("original_price"));
+                p.setCondition(rs.getString("condition"));
+                p.setDescription(rs.getString("description"));
+                p.setImage(rs.getString("image"));
+                p.setImages(rs.getString("images"));
+                p.setContact(rs.getString("contact"));
+                p.setUserId(rs.getInt("user_id"));
+                p.setStatus(rs.getInt("status"));
+                p.setTags(rs.getString("tags"));
+                p.setCreateTime(rs.getString("create_time"));
+                p.setUpdateTime(rs.getString("update_time"));
+                list.add(p);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            DBUtil.close(conn, ps, rs);
+        }
+        return list;
+    }
+
+    @Override
+    public ArrayList<Product> getProductByFilter(String keyword, Integer categoryId, String condition, String sort) {
+        ArrayList<Product> list = new ArrayList<>();
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        try {
+            conn = DBUtil.getConnection();
+            StringBuilder sql = new StringBuilder(
+                    "SELECT id, title, category_id, price, original_price, `condition`, description, image, images, contact, user_id, status, tags, create_time, update_time FROM product WHERE status = 1"
+            );
+            if (keyword != null && !keyword.trim().isEmpty()) {
+                sql.append(" AND title LIKE ?");
+            }
+            if (categoryId != null && categoryId > 0) {
+                sql.append(" AND category_id = ?");
+            }
+            if (condition != null && !condition.trim().isEmpty()) {
+                sql.append(" AND `condition` = ?");
+            }
+            if ("price_asc".equals(sort)) {
+                sql.append(" ORDER BY price ASC");
+            } else if ("price_desc".equals(sort)) {
+                sql.append(" ORDER BY price DESC");
+            } else if ("newest".equals(sort)) {
+                sql.append(" ORDER BY create_time DESC");
+            } else {
+                sql.append(" ORDER BY id DESC");
+            }
+            ps = conn.prepareStatement(sql.toString());
+            int idx = 1;
+            if (keyword != null && !keyword.trim().isEmpty()) {
+                ps.setString(idx++, "%" + keyword.trim() + "%");
+            }
+            if (categoryId != null && categoryId > 0) {
+                ps.setInt(idx++, categoryId);
+            }
+            if (condition != null && !condition.trim().isEmpty()) {
+                ps.setString(idx++, condition.trim());
+            }
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                Product p = new Product();
+                p.setId(rs.getInt("id"));
+                p.setTitle(rs.getString("title"));
+                p.setCategoryId(rs.getInt("category_id"));
+                p.setPrice(rs.getBigDecimal("price"));
+                p.setOriginalPrice(rs.getBigDecimal("original_price"));
+                p.setCondition(rs.getString("condition"));
+                p.setDescription(rs.getString("description"));
+                p.setImage(rs.getString("image"));
+                p.setImages(rs.getString("images"));
+                p.setContact(rs.getString("contact"));
+                p.setUserId(rs.getInt("user_id"));
+                p.setStatus(rs.getInt("status"));
+                p.setTags(rs.getString("tags"));
+                p.setCreateTime(rs.getString("create_time"));
+                p.setUpdateTime(rs.getString("update_time"));
+                list.add(p);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            DBUtil.close(conn, ps, rs);
+        }
+        return list;
+    }
+
+    @Override
+    public ArrayList<String> getAllTags() {
+        ArrayList<String> allTags = new ArrayList<>();
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        try {
+            conn = DBUtil.getConnection();
+            String sql = "SELECT tags FROM product WHERE status = 1 AND tags IS NOT NULL AND tags != ''";
+            ps = conn.prepareStatement(sql);
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                String tags = rs.getString("tags");
+                if (tags != null && !tags.isEmpty()) {
+                    String[] split = tags.split("[,，]");
+                    for (String t : split) {
+                        String trim = t.trim();
+                        if (!trim.isEmpty() && !allTags.contains(trim)) {
+                            allTags.add(trim);
+                        }
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            DBUtil.close(conn, ps, rs);
+        }
+        return allTags;
+    }
+
+    @Override
+    public ArrayList<String> getAllConditions() {
+        ArrayList<String> list = new ArrayList<>();
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        try {
+            conn = DBUtil.getConnection();
+            String sql = "SELECT DISTINCT `condition` FROM product WHERE status = 1 AND `condition` IS NOT NULL AND `condition` != ''";
+            ps = conn.prepareStatement(sql);
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                String c = rs.getString("condition");
+                if (c != null && !c.trim().isEmpty()) {
+                    list.add(c.trim());
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -172,7 +358,7 @@ public class ProductDAOImpl implements ProductDAO {
         PreparedStatement ps = null;
         try {
             conn = DBUtil.getConnection();
-            String sql = "INSERT INTO product (title, category_id, price, original_price, `condition`, description, image, images, contact, user_id, status, create_time, update_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())\n";
+            String sql = "INSERT INTO product (title, category_id, price, original_price, `condition`, description, image, images, contact, user_id, status, tags) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
             ps = conn.prepareStatement(sql);
             ps.setString(1, product.getTitle());
             ps.setInt(2, product.getCategoryId() != null ? product.getCategoryId() : 0);
@@ -185,6 +371,7 @@ public class ProductDAOImpl implements ProductDAO {
             ps.setString(9, product.getContact());
             ps.setInt(10, product.getUserId() != null ? product.getUserId() : 0);
             ps.setInt(11, product.getStatus() != null ? product.getStatus() : 0);
+            ps.setString(12, product.getTags());
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -200,18 +387,12 @@ public class ProductDAOImpl implements ProductDAO {
         PreparedStatement ps = null;
         try {
             conn = DBUtil.getConnection();
-            String sql = "UPDATE product SET title = ?, category_id = ?, price = ?, original_price = ?, `condition` = ?, description = ?, image = ?, images = ?, contact = ?, user_id = ?, status = ? WHERE id = ?";
+            String sql = "UPDATE product SET title = ?, category_id = ?, price = ?, original_price = ?, `condition` = ?, description = ?, image = ?, images = ?, contact = ?, user_id = ?, status = ?, tags = ? WHERE id = ?";
             ps = conn.prepareStatement(sql);
             ps.setString(1, product.getTitle());
             ps.setInt(2, product.getCategoryId() != null ? product.getCategoryId() : 0);
             ps.setBigDecimal(3, product.getPrice());
-
-            if (product.getOriginalPrice() != null) {
-                ps.setBigDecimal(4, product.getOriginalPrice());
-            } else {
-                ps.setNull(4, java.sql.Types.DECIMAL);
-            }
-
+            ps.setBigDecimal(4, product.getOriginalPrice());
             ps.setString(5, product.getCondition());
             ps.setString(6, product.getDescription());
             ps.setString(7, product.getImage());
@@ -219,15 +400,31 @@ public class ProductDAOImpl implements ProductDAO {
             ps.setString(9, product.getContact());
             ps.setInt(10, product.getUserId() != null ? product.getUserId() : 0);
             ps.setInt(11, product.getStatus() != null ? product.getStatus() : 0);
-            ps.setInt(12, product.getId());
-
-            int rows = ps.executeUpdate();
-            System.out.println("DAO updateProduct affected rows: " + rows + ", status=" + product.getStatus());
-            return rows > 0;
+            ps.setString(12, product.getTags());
+            ps.setInt(13, product.getId());
+            return ps.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
-            System.out.println("DAO updateProduct error: " + e.getMessage());
             return false;
+        } finally {
+            DBUtil.close(conn, ps, null);
+        }
+    }
+
+    @Override
+    public int updateStatus(Integer id, Integer status) {
+        Connection conn = null;
+        PreparedStatement ps = null;
+        try {
+            conn = DBUtil.getConnection();
+            String sql = "UPDATE product SET status = ? WHERE id = ?";
+            ps = conn.prepareStatement(sql);
+            ps.setInt(1, status);
+            ps.setInt(2, id);
+            return ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return 0;
         } finally {
             DBUtil.close(conn, ps, null);
         }
@@ -248,20 +445,6 @@ public class ProductDAOImpl implements ProductDAO {
             return false;
         } finally {
             DBUtil.close(conn, ps, null);
-        }
-    }
-
-    @Override
-    public int updateStatus(Integer id, Integer status) {
-        String sql = "UPDATE product SET status = ? WHERE id = ?";
-        try (Connection conn = DBUtil.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1, status);
-            ps.setInt(2, id);
-            return ps.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return 0;
         }
     }
 }

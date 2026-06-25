@@ -49,6 +49,7 @@ public class MProductAddServlet extends ViewBaseServlet {
         String title = req.getParameter("pname");
         String priceStr = req.getParameter("price");
         String condition = req.getParameter("stock");
+        String tags = req.getParameter("tags");
 
         String imagePath = null;
         Part part = req.getPart("img");
@@ -69,6 +70,7 @@ public class MProductAddServlet extends ViewBaseServlet {
         product.setPrice(new BigDecimal(priceStr));
         product.setCondition(condition);
         product.setImage(imagePath);
+        product.setTags(tags);
         product.setStatus(1);
         ProductDAO productDAO = new ProductDAOImpl();
         productDAO.addProduct(product);
