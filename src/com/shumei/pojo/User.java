@@ -8,8 +8,9 @@ public class User {
     private String password;
     private String nickname;
     private String phone;
-    private String wechat;
     private String avatar;
+
+    private String wechat;
     private Integer status;
     private String createTime;
     private BigDecimal balance;
@@ -31,6 +32,8 @@ public class User {
 
     public String getPhone() { return phone; }
     public void setPhone(String phone) { this.phone = phone; }
+
+
 
     public String getWechat() { return wechat; }
     public void setWechat(String wechat) { this.wechat = wechat; }

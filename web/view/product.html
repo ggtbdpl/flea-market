@@ -182,6 +182,14 @@
             body { padding-top: 60px; }
             header { padding: 12px 20px; }
         }
+
+        /* Toast 统一提示 */
+        .toast-container { position:fixed; top:80px; left:50%; transform:translateX(-50%); z-index:9999; pointer-events:none; }
+        .toast { background:#333; color:#fff; padding:12px 28px; border-radius:8px; font-size:14px; box-shadow:0 4px 12px rgba(0,0,0,0.15); margin-bottom:10px; opacity:0; transform:translateY(-20px); transition:all 0.3s ease; pointer-events:auto; min-width:200px; text-align:center; }
+        .toast.show { opacity:1; transform:translateY(0); }
+        .toast.success { background:#0a8c7f; }
+        .toast.error { background:#e74c3c; }
+
     </style>
 </head>
 <body>
@@ -200,6 +208,12 @@
 </header>
 
 <div class="container">
+
+    <input type="hidden" id="pid" th:value="${product.id}"/>
+    <input type="hidden" id="price" th:value="${product.price}"/>
+    <input type="hidden" id="userBalance" th:value="${currentUser != null ? currentUser.balance : 0}"/>
+
+
     <div class="detail-wrapper">
         <!-- 左侧图片 -->
         <div class="image-section">
@@ -249,14 +263,14 @@
             <!-- 交易按钮 -->
             <div class="action-btns" th:if="${product.status != null}">
                 <!-- 未登录 -->
-                <button th:if="${currentUser == null and product.status == 1}" class="btn btn-primary" onclick="alert('请先登录')">立即购买</button>
+                <button th:if="${currentUser == null and product.status == 1}" class="btn btn-primary" onclick="showToast('请先登录','error')">立即购买</button>
 
                 <!-- 登录且是卖家自己 -->
                 <button th:if="${currentUser != null and product.userId != null and product.userId == currentUser.id}" class="btn btn-secondary" disabled>我的商品</button>
 
                 <!-- 上架中，可购买 -->
                 <button th:if="${currentUser != null and product.userId != null and product.userId != currentUser.id and product.status == 1}"
-                        class="btn btn-primary" th:onclick="'createTrade(' + ${product.id} + ')'">立即购买</button>
+                        class="btn btn-primary" th:onclick="createTrade()">立即购买</button>
 
                 <!-- 已售出 -->
                 <div th:if="${product.status == 3}" style="width:100%;">
@@ -369,6 +383,35 @@
     </div>
 </div>
 
+<!-- 购买确认模态框 -->
+<div id="buyModal" class="modal-overlay" onclick="if(event.target===this)closeBuyModal()">
+    <div class="modal-box" style="max-width:360px;">
+        <h3 class="modal-title">确认购买</h3>
+        <div style="margin-bottom:18px;">
+            <p style="color:#666;font-size:14px;">商品：<span id="buyProductName" style="color:#333;font-weight:600;"></span></p>
+            <p style="color:#666;font-size:14px;margin-top:10px;">价格：<span style="color:#e74c3c;font-size:22px;font-weight:bold;">¥<span id="buyPrice"></span></span></p>
+            <p style="color:#666;font-size:14px;margin-top:10px;">您的余额：<span style="color:#0a8c7f;font-weight:600;">¥<span id="buyBalance"></span></span></p>
+            <p id="buyError" style="color:#e74c3c;font-size:13px;margin-top:12px;display:none;">余额不足，无法购买</p>
+        </div>
+        <div class="modal-actions">
+            <button class="btn btn-secondary" onclick="closeBuyModal()">取消</button>
+            <button class="btn btn-primary" id="buyConfirmBtn" onclick="doCreateTrade()">确认购买</button>
+        </div>
+    </div>
+</div>
+
+<!-- 通用确认模态框（用于交易确认、收货确认） -->
+<div id="confirmModal" class="modal-overlay" onclick="if(event.target===this)closeConfirmModal()">
+    <div class="modal-box" style="max-width:360px;">
+        <h3 class="modal-title" id="confirmTitle">确认</h3>
+        <p id="confirmText" style="color:#666;font-size:14px;margin-bottom:20px;line-height:1.6;"></p>
+        <div class="modal-actions">
+            <button class="btn btn-secondary" onclick="closeConfirmModal()">取消</button>
+            <button class="btn btn-primary" id="confirmActionBtn">确认</button>
+        </div>
+    </div>
+</div>
+
 <footer>
     <div class="copyright">
         <p>&copy; 2026 校园跳蚤市场 版权所有 | 仅供校内使用</p>
@@ -376,7 +419,24 @@
 </footer>
 
 <script th:inline="javascript">
-    var productId = parseInt(document.getElementById('pid').value);
+    var productId = parseInt(document.getElementById('pid').value) || 0;
+    var productPrice = parseFloat(document.getElementById('price').value) || 0;
+
+    function showToast(msg, type) {
+        var container = document.getElementById('toastContainer');
+        if (!container) {
+            container = document.createElement('div');
+            container.id = 'toastContainer';
+            container.className = 'toast-container';
+            document.body.appendChild(container);
+        }
+        var toast = document.createElement('div');
+        toast.className = 'toast ' + (type || '');
+        toast.textContent = msg;
+        container.appendChild(toast);
+        setTimeout(function() { toast.classList.add('show'); }, 10);
+        setTimeout(function() { toast.classList.remove('show'); setTimeout(function() { toast.remove(); }, 300); }, 2500);
+    }
 
     function switchImage(thumb) {
         document.getElementById('mainImage').src = thumb.src;
@@ -386,53 +446,104 @@
         thumb.classList.add('active');
     }
 
-    function createTrade(pid) {
-        if (!confirm('确认购买？将扣除 ¥' + productPrice + ' 虚拟货币')) return;
+    function createTrade() {
+        var balance = parseFloat(document.getElementById('userBalance').value) || 0;
+        var price = productPrice;
+        document.getElementById('buyProductName').textContent = document.querySelector('.product-title').textContent;
+        document.getElementById('buyPrice').textContent = price;
+        document.getElementById('buyBalance').textContent = balance.toFixed(2);
+        var errorMsg = document.getElementById('buyError');
+        var confirmBtn = document.getElementById('buyConfirmBtn');
+        if (balance < price) {
+            errorMsg.style.display = 'block';
+            confirmBtn.disabled = true;
+            confirmBtn.style.background = '#ccc';
+            confirmBtn.style.cursor = 'not-allowed';
+        } else {
+            errorMsg.style.display = 'none';
+            confirmBtn.disabled = false;
+            confirmBtn.style.background = '';
+            confirmBtn.style.cursor = '';
+        }
+        document.getElementById('buyModal').classList.add('show');
+    }
 
+    function doCreateTrade() {
+        closeBuyModal();
         fetch('trade', {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: 'action=create&productId=' + pid
+            body: 'action=create&productId=' + productId
         }).then(function(r) { return r.json(); }).then(function(data) {
-            alert(data.msg);
-            if (data.success) location.reload();
+            showToast(data.msg, data.success ? 'success' : 'error');
+            if (data.success) setTimeout(function() { location.reload(); }, 800);
+        }).catch(function(err) {
+            showToast('请求失败，请检查网络', 'error');
         });
     }
 
+    function closeBuyModal() {
+        document.getElementById('buyModal').classList.remove('show');
+    }
+
+    var confirmCallback = null;
+    function openConfirmModal(title, text, callback) {
+        document.getElementById('confirmTitle').textContent = title;
+        document.getElementById('confirmText').textContent = text;
+        confirmCallback = callback;
+        document.getElementById('confirmModal').classList.add('show');
+    }
+    function closeConfirmModal() {
+        document.getElementById('confirmModal').classList.remove('show');
+        confirmCallback = null;
+    }
+    document.getElementById('confirmActionBtn').addEventListener('click', function() {
+        if (confirmCallback) confirmCallback();
+        closeConfirmModal();
+    });
+
     function confirmTrade(tid) {
-        if (!confirm('确认交易？买家将可以确认收货')) return;
-        fetch('trade', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: 'action=confirm&tradeId=' + tid
-        }).then(function(r) { return r.json(); }).then(function(data) {
-            alert(data.msg);
-            if (data.success) location.reload();
+        openConfirmModal('确认交易', '确认后买家将可以确认收货，交易款项将转入您的账户。', function() {
+            fetch('trade', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: 'action=confirm&tradeId=' + tid
+            }).then(function(r) { return r.json(); }).then(function(data) {
+                showToast(data.msg, data.success ? 'success' : 'error');
+                if (data.success) setTimeout(function() { location.reload(); }, 800);
+            }).catch(function(err) {
+                showToast('请求失败，请检查网络', 'error');
+            });
         });
     }
 
     function receiveTrade(tid) {
-        if (!confirm('确认收货？交易将完成，款项将转给卖家')) return;
-        fetch('trade', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: 'action=receive&tradeId=' + tid
-        }).then(function(r) { return r.json(); }).then(function(data) {
-            alert(data.msg);
-            if (data.success) location.reload();
+        openConfirmModal('确认收货', '确认收货后交易将完成，款项将转给卖家。请确保已收到商品。', function() {
+            fetch('trade', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: 'action=receive&tradeId=' + tid
+            }).then(function(r) { return r.json(); }).then(function(data) {
+                showToast(data.msg, data.success ? 'success' : 'error');
+                if (data.success) setTimeout(function() { location.reload(); }, 800);
+            }).catch(function(err) {
+                showToast('请求失败，请检查网络', 'error');
+            });
         });
     }
 
     function submitMessage() {
         var content = document.getElementById('msgContent').value.trim();
-        if (!content) { alert('请输入留言内容'); return; }
+        if (!content) { showToast('请输入留言内容', 'error'); return; }
         fetch('api/message', {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: 'productId=' + productId + '&content=' + encodeURIComponent(content)
+            body: 'action=add&productId=' + productId + '&content=' + encodeURIComponent(content)
         }).then(function(r) { return r.json(); }).then(function(data) {
-            alert(data.msg);
-            if (data.success) location.reload();
+            showToast(data.msg, data.code === 200 ? 'success' : 'error');
+            if (data.code === 200) setTimeout(function() { location.reload(); }, 800);
+        }).catch(function(err) {
+            showToast('请求失败，请检查网络', 'error');
         });
     }
 
@@ -443,14 +554,16 @@
 
     function submitReply(msgId) {
         var content = document.getElementById('replyInput-' + msgId).value.trim();
-        if (!content) { alert('请输入回复内容'); return; }
+        if (!content) { showToast('请输入回复内容', 'error'); return; }
         fetch('api/message', {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: 'productId=' + productId + '&replyId=' + msgId + '&replyContent=' + encodeURIComponent(content)
+            body: 'action=add&productId=' + productId + '&content=' + encodeURIComponent(content)
         }).then(function(r) { return r.json(); }).then(function(data) {
-            alert(data.msg);
-            if (data.success) location.reload();
+            showToast(data.msg, data.code === 200 ? 'success' : 'error');
+            if (data.code === 200) setTimeout(function() { location.reload(); }, 800);
+        }).catch(function(err) {
+            showToast('请求失败，请检查网络', 'error');
         });
     }
 
@@ -467,8 +580,10 @@
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             body: 'productId=' + productId + '&reason=' + encodeURIComponent(reason)
         }).then(function(r) { return r.json(); }).then(function(data) {
-            alert(data.msg);
-            closeReport();
+            showToast(data.msg, data.success ? 'success' : 'error');
+            if (data.success) closeReport();
+        }).catch(function(err) {
+            showToast('请求失败，请检查网络', 'error');
         });
     }
 </script>

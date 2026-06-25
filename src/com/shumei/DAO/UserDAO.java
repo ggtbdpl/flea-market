@@ -13,7 +13,8 @@ public interface UserDAO {
     boolean checkUsernameExists(String username);
     BigDecimal getBalance(Integer userId);
     int updateBalance(Integer userId, BigDecimal amount);
-
+    boolean updateProfile(User user);
+    boolean updatePassword(Integer id, String password);
 
     // 新增方法
     List<User> getAllUsers();

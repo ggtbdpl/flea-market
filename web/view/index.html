@@ -2333,6 +2333,14 @@
         }
 
 
+        /* Toast 统一提示 */
+        .toast-container { position:fixed; top:90px; left:50%; transform:translateX(-50%); z-index:9999; pointer-events:none; }
+        .toast { background:#333; color:#fff; padding:12px 28px; border-radius:8px; font-size:14px; box-shadow:0 4px 12px rgba(0,0,0,0.15); margin-bottom:10px; opacity:0; transform:translateY(-20px); transition:all 0.3s ease; pointer-events:auto; min-width:200px; text-align:center; }
+        .toast.show { opacity:1; transform:translateY(0); }
+        .toast.success { background:#0a8c7f; }
+        .toast.error { background:#e74c3c; }
+
+
     </style>
     <link rel="stylesheet" th:href="@{/static/font/iconfont.css}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -2756,24 +2764,36 @@
 
 
 
-<!-- 用户登录注册JS -->
-<script>
+<!-- 用户登录注册JS --><script>
+    function showToast(msg, type) {
+        var container = document.getElementById('toastContainer');
+        if (!container) {
+            container = document.createElement('div');
+            container.id = 'toastContainer';
+            container.className = 'toast-container';
+            document.body.appendChild(container);
+        }
+        var toast = document.createElement('div');
+        toast.className = 'toast ' + (type || '');
+        toast.textContent = msg;
+        container.appendChild(toast);
+        setTimeout(function() { toast.classList.add('show'); }, 10);
+        setTimeout(function() { toast.classList.remove('show'); setTimeout(function() { toast.remove(); }, 300); }, 2500);
+    }
+
     (function() {
         const ctxPath = document.querySelector('meta[name="ctx-path"]')?.content || '';
 
-        // 登录表单提交
         const loginForm = document.getElementById('loginForm');
         if (loginForm) {
             loginForm.addEventListener('submit', function(e) {
                 e.preventDefault();
                 const username = document.getElementById('username').value.trim();
                 const password = document.getElementById('password').value;
-
                 if (!username || !password) {
-                    alert('用户名和密码不能为空');
+                    showToast('用户名和密码不能为空', 'error');
                     return;
                 }
-
                 fetch(ctxPath + '/user/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -2782,17 +2802,16 @@
                     .then(res => res.json())
                     .then(data => {
                         if (data.code === 200) {
-                            alert('登录成功！欢迎，' + data.nickname);
-                            location.reload();
+                            showToast('登录成功！欢迎，' + data.nickname, 'success');
+                            setTimeout(function() { location.reload(); }, 800);
                         } else {
-                            alert(data.msg);
+                            showToast(data.msg, 'error');
                         }
                     })
-                    .catch(() => alert('登录请求失败，请检查网络'));
+                    .catch(() => showToast('登录请求失败，请检查网络', 'error'));
             });
         }
 
-        // 注册表单提交
         const registerForm = document.getElementById('registerForm');
         if (registerForm) {
             registerForm.addEventListener('submit', function(e) {
@@ -2801,12 +2820,10 @@
                 const password = document.getElementById('regPassword').value;
                 const nickname = document.getElementById('regNickname').value.trim();
                 const phone = document.getElementById('regPhone').value.trim();
-
                 if (!username || !password) {
-                    alert('用户名和密码不能为空');
+                    showToast('用户名和密码不能为空', 'error');
                     return;
                 }
-
                 fetch(ctxPath + '/register', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -2818,18 +2835,17 @@
                     .then(res => res.json())
                     .then(data => {
                         if (data.code === 200) {
-                            alert('注册成功！请登录');
+                            showToast('注册成功！请登录', 'success');
                             closeRegisterModal();
-                            setTimeout(openLoginModal, 300);
+                            setTimeout(openLoginModal, 400);
                         } else {
-                            alert(data.msg);
+                            showToast(data.msg, 'error');
                         }
                     })
-                    .catch(() => alert('注册请求失败，请检查网络'));
+                    .catch(() => showToast('注册请求失败，请检查网络', 'error'));
             });
         }
 
-        // 打开/关闭登录模态框
         window.openLoginModal = function() {
             document.getElementById('loginModal').classList.add('active');
             document.body.style.overflow = 'hidden';
@@ -2838,8 +2854,6 @@
             document.getElementById('loginModal').classList.remove('active');
             document.body.style.overflow = 'auto';
         };
-
-        // 打开/关闭注册模态框
         window.openRegisterModal = function() {
             document.getElementById('registerModal').classList.add('active');
             document.body.style.overflow = 'hidden';
@@ -2848,8 +2862,6 @@
             document.getElementById('registerModal').classList.remove('active');
             document.body.style.overflow = 'auto';
         };
-
-        // 切换
         window.switchToRegister = function() {
             closeLoginModal();
             setTimeout(openRegisterModal, 300);
@@ -2859,7 +2871,6 @@
             setTimeout(openLoginModal, 300);
         };
 
-        // 绑定"我的账户"点击事件
         const accountLink = document.getElementById('accountLink');
         if (accountLink) {
             accountLink.addEventListener('click', function(e) {
@@ -2868,7 +2879,6 @@
             });
         }
 
-        // 登录模态框关闭按钮
         document.querySelectorAll('#loginModal .modal-close').forEach(btn => {
             btn.addEventListener('click', closeLoginModal);
         });
@@ -2876,7 +2886,6 @@
             if (e.target === this) closeLoginModal();
         });
 
-        // 注册模态框关闭按钮
         document.querySelectorAll('#registerModal .modal-close').forEach(btn => {
             btn.addEventListener('click', closeRegisterModal);
         });
@@ -2885,6 +2894,7 @@
         });
     })();
 </script>
+
 <script>
     (function() {
         var params = new URLSearchParams(window.location.search);
