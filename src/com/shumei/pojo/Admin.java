@@ -1,50 +1,28 @@
 package com.shumei.pojo;
 
+import java.sql.Timestamp;
+
 public class Admin {
-    int adminID;
-    String username;
-    String password;
-    int role;
+    private int id;           // 原来是 adminID，改成 id
+    private String username;
+    private String password;
+    private String nickname;
+    private Timestamp createTime;
 
-    public Admin(){}
+    public Admin() {}
 
-    public Admin(String username, String password, int role){
-        this.password=password;
-        this.username=username;
-        this.role=role;
-    }
-    //初始化
+    public int getId() { return id; }
+    public void setId(int id) { this.id = id; }
 
+    public String getUsername() { return username; }
+    public void setUsername(String username) { this.username = username; }
 
-    public int getAdminID() {
-        return adminID;
-    }
+    public String getPassword() { return password; }
+    public void setPassword(String password) { this.password = password; }
 
-    public void setAdminID(int adminID) {
-        this.adminID = adminID;
-    }
+    public String getNickname() { return nickname; }
+    public void setNickname(String nickname) { this.nickname = nickname; }
 
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public int getRole() {
-        return role;
-    }
-
-    public void setRole(int role) {
-        this.role = role;
-    }
+    public Timestamp getCreateTime() { return createTime; }
+    public void setCreateTime(Timestamp createTime) { this.createTime = createTime; }
 }

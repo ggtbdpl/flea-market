@@ -47,6 +47,48 @@ public class MessageDAOImpl implements MessageDAO {
     }
 
     @Override
+    public List<Message> getAllMessages() {
+        List<Message> list = new ArrayList<>();
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+
+        String sql = "SELECT m.id, m.product_id, m.from_user_id, m.to_user_id, " +
+                "m.content, m.is_read, m.create_time, " +
+                "u.username, p.title as product_name " +
+                "FROM message m " +
+                "LEFT JOIN user u ON m.from_user_id = u.id " +
+                "LEFT JOIN product p ON m.product_id = p.id " +
+                "ORDER BY m.create_time DESC";
+
+        try {
+            conn = DBUtil.getConnection();
+            ps = conn.prepareStatement(sql);
+            rs = ps.executeQuery();
+
+            while (rs.next()) {
+                Message msg = new Message();
+                msg.setId(rs.getInt("id"));
+                msg.setProductId(rs.getInt("product_id"));
+                msg.setFromUserId(rs.getInt("from_user_id"));
+                msg.setToUserId(rs.getInt("to_user_id"));
+                msg.setContent(rs.getString("content"));
+                msg.setIsRead(rs.getInt("is_read"));
+                msg.setCreateTime(rs.getTimestamp("create_time"));
+                msg.setUsername(rs.getString("username"));
+                msg.setProductName(rs.getString("product_name"));
+                list.add(msg);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            DBUtil.close(conn, ps, rs);
+        }
+
+        return list;
+    }
+
+    @Override
     public boolean addMessage(Message message) {
         Connection conn = null;
         PreparedStatement ps = null;

@@ -31,11 +31,11 @@ public class Adminlogin extends ViewBaseServlet {
 
         if (admin == null) {
             request.setAttribute("error", "用户名或密码错误");
-            processTemplate("login", request, response);
+            processTemplate("admin/login", request, response);
         } else {
             HttpSession session = request.getSession();
             session.setAttribute("admin", admin);
-            response.sendRedirect(request.getContextPath() + "/Mindex");
+            response.sendRedirect(request.getContextPath() + "/admin/category");
         }
     }
 }

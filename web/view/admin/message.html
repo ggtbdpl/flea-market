@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>留言管理</title>
+    <link rel="stylesheet" th:href="@{/static/css/admin.css}">
+    <style>
+        /* 表格列宽固定 */
+        .data-table th:nth-child(1),
+        .data-table td:nth-child(1) { width: 60px; text-align: center; }
+
+        .data-table th:nth-child(2),
+        .data-table td:nth-child(2) { width: 15%; text-align: center; }
+
+        .data-table th:nth-child(3),
+        .data-table td:nth-child(3) { width: 12%; text-align: center; }
+
+        .data-table th:nth-child(4),
+        .data-table td:nth-child(4) { width: 30%; text-align: left; padding-left: 20px; }
+
+        .data-table th:nth-child(5),
+        .data-table td:nth-child(5) { width: 10%; text-align: center; }
+
+        .data-table th:nth-child(6),
+        .data-table td:nth-child(6) { width: 15%; text-align: center; }
+
+        .data-table th:nth-child(7),
+        .data-table td:nth-child(7) { width: 15%; text-align: center; }
+
+        /* 状态标签 — 简洁有辨识度 */
+        .status-tag {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 3px;
+            font-size: 12px;
+            border: 1px solid;
+        }
+        .status-unread {
+            color: #c0392b;
+            border-color: #e74c3c;
+            background: #fdf2f2;
+        }
+        .status-read {
+            color: #27ae60;
+            border-color: #2ecc71;
+            background: #f2fdf5;
+        }
+
+        /* 内容列省略 */
+        .content-cell {
+            max-width: 300px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* 操作按钮 — 简洁 */
+        .action-btns a {
+            padding: 3px 10px;
+            border-radius: 3px;
+            font-size: 13px;
+            text-decoration: none;
+            margin: 0 2px;
+            border: 1px solid;
+            transition: all 0.2s;
+        }
+        .action-btns a:hover {
+            opacity: 0.8;
+        }
+
+        .btn-read {
+            color: #2980b9;
+            border-color: #3498db;
+            background: #f8fbfd;
+        }
+        .btn-read:hover {
+            background: #eaf2f8;
+        }
+
+        .delete {
+            color: #c0392b;
+            border-color: #e74c3c;
+            background: #fdf2f2;
+        }
+        .delete:hover {
+            background: #f8e5e5;
+        }
+
+        /* 空数据提示 — 简洁大方 */
+        .empty-tip {
+            text-align: center;
+            padding: 80px 20px;
+            color: #999;
+        }
+        .empty-icon {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 16px;
+            background: #e8e8e8;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            color: #bbb;
+        }
+        .empty-text {
+            font-size: 14px;
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+<div class="admin-wrapper">
+    <aside class="sidebar">
+        <div class="logo"><h3>校园跳蚤市场</h3><span>后台管理系统</span></div>
+        <nav>
+            <ul>
+                <li><a href="#">首页概览</a></li>
+                <li><a href="#">商品管理</a></li>
+                <li><a href="#">分类管理</a></li>
+                <li><a href="#">用户管理</a></li>
+                <li><a href="#">交易管理</a></li>
+                <li><a href="#">公告管理</a></li>
+                <li><a href="/fleamarket/admin/message" class="active">留言管理</a></li>
+            </ul>
+        </nav>
+        <div class="logout"><a href="#">退出登录</a></div>
+    </aside>
+
+    <main class="main-content">
+        <header class="top-bar"><span>欢迎，管理员</span></header>
+        <div class="content-body">
+            <div class="page-header">
+                <h2>留言管理</h2>
+            </div>
+
+            <table class="data-table" th:if="${not #lists.isEmpty(messageList)}">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>商品</th>
+                    <th>留言用户</th>
+                    <th>内容</th>
+                    <th>状态</th>
+                    <th>时间</th>
+                    <th>操作</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="msg : ${messageList}">
+                    <td th:text="${msg.id}">1</td>
+                    <td th:text="${msg.productName}">商品名称</td>
+                    <td th:text="${msg.username}">用户名</td>
+                    <td class="content-cell" th:text="${msg.content}" th:title="${msg.content}">留言内容</td>
+                    <td>
+                        <span th:if="${msg.isRead == 0}" class="status-tag status-unread">未读</span>
+                        <span th:if="${msg.isRead == 1}" class="status-tag status-read">已读</span>
+                    </td>
+                    <td th:text="${#dates.format(msg.createTime, 'yyyy-MM-dd HH:mm')}">2024-01-01</td>
+                    <td class="action-btns">
+                        <a th:if="${msg.isRead == 0}" th:href="@{/admin/message(action='read', messageId=${msg.id})}" class="btn-read">标记已读</a>
+                        <a th:href="@{/admin/message(action='delete', messageId=${msg.id})}" class="delete" onclick="return confirm('确定删除这条留言？')">删除</a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+
+            <div class="empty-tip" th:if="${#lists.isEmpty(messageList)}">
+                <div class="empty-icon">!</div>
+                <div class="empty-text">暂无留言数据</div>
+            </div>
+        </div>
+    </main>
+</div>
+</body>
+</html>

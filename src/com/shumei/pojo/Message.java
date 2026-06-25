@@ -4,16 +4,19 @@ import java.sql.Timestamp;
 
 public class Message {
     private int id;
-    private int productId;      // 商品ID
-    private int fromUserId;     // 留言人ID
-    private int toUserId;       // 接收人ID（卖家ID，或回复对象的用户ID）
-    private String content;     // 内容
-    private int isRead;         // 是否已读：0未读 1已读
+    private int productId;
+    private int fromUserId;
+    private int toUserId;
+    private String content;
+    private int isRead;
     private Timestamp createTime;
+
+    // 新增：用于后台展示
+    private String username;      // 留言人用户名
+    private String productName;   // 商品名称
 
     public Message() {}
 
-    // ===== Getter & Setter =====
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
 
@@ -34,4 +37,10 @@ public class Message {
 
     public Timestamp getCreateTime() { return createTime; }
     public void setCreateTime(Timestamp createTime) { this.createTime = createTime; }
+
+    public String getUsername() { return username; }
+    public void setUsername(String username) { this.username = username; }
+
+    public String getProductName() { return productName; }
+    public void setProductName(String productName) { this.productName = productName; }
 }
