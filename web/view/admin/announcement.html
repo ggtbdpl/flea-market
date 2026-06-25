@@ -24,13 +24,14 @@
         <div class="logo"><h3>校园跳蚤市场</h3><span>后台管理系统</span></div>
         <nav>
             <ul>
-                <li><a th:href="@{/Mindex}">首页概览</a></li>
-                <li><a th:href="@{/Mindex}">商品管理</a></li>
+                <li><a th:href="@{/admin/home}">首页概览</a></li>
+                <li><a th:href="@{/admin/product}">商品管理</a></li>
                 <li><a th:href="@{/admin/category}">分类管理</a></li>
                 <li><a th:href="@{/admin/user}">用户管理</a></li>
                 <li><a th:href="@{/admin/trade}">交易管理</a></li>
                 <li><a href="#" class="active">公告管理</a></li>
-                <li><a href="#">留言管理</a></li>
+                <li><a th:href="@{/admin/message}">留言管理</a></li>
+                <li><a th:href="@{/admin/report}">举报管理</a></li>
             </ul>
         </nav>
         <div class="logout"><a th:href="@{/logout}">退出登录</a></div>

@@ -14,6 +14,41 @@
         .form-group label { display: block; margin-bottom: 6px; font-size: 14px; color: #555; }
         .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; }
         .form-actions { display: flex; gap: 12px; justify-content: flex-end; margin-top: 20px; }
+
+        .data-table {
+            table-layout: fixed;
+            width: 100%;
+        }
+        .data-table th,
+        .data-table td {
+            padding: 12px 10px;
+            vertical-align: middle;
+            text-align: center;
+        }
+        .data-table td:nth-child(3) {
+            text-align: center;
+        }
+
+        .status-1 {
+            color: #27ae60;
+        }
+        .status-2 {
+            color: #c0392b;
+        }
+
+        .action-btns {
+            white-space: nowrap;
+        }
+        .action-btns a {
+            text-decoration: none;
+            margin: 0 4px;
+        }
+        .edit-link {
+            color: #2980b9;
+        }
+        .delete {
+            color: #c0392b;
+        }
     </style>
 </head>
 <body>
@@ -22,13 +57,14 @@
         <div class="logo"><h3>校园跳蚤市场</h3><span>后台管理系统</span></div>
         <nav>
             <ul>
-                <li><a href="#">首页概览</a></li>
-                <li><a href="#">商品管理</a></li>
-                <li><a href="#" class="active">分类管理</a></li>
-                <li><a href="#">用户管理</a></li>
-                <li><a href="#">交易管理</a></li>
-                <li><a href="#">公告管理</a></li>
-                <li><a href="/fleamarket/admin/message">留言管理</a></li>
+                <li><a th:href="@{/admin/home}">首页概览</a></li>
+                <li><a th:href="@{/admin/product}">商品管理</a></li>
+                <li><a th:href="@{/admin/category}" class="active">分类管理</a></li>
+                <li><a th:href="@{/admin/user}">用户管理</a></li>
+                <li><a th:href="@{/admin/trade}">交易管理</a></li>
+                <li><a th:href="@{/admin/announcement}">公告管理</a></li>
+                <li><a th:href="@{/admin/message}">留言管理</a></li>
+                <li><a th:href="@{/admin/report}">举报管理</a></li>
             </ul>
         </nav>
         <div class="logout"><a href="#">退出登录</a></div>
@@ -44,7 +80,15 @@
 
             <table class="data-table">
                 <thead>
-                <tr><th>ID</th><th>名称</th><th>描述</th><th>图标</th><th>排序</th><th>状态</th><th>操作</th></tr>
+                <tr>
+                    <th style="width: 8%;">ID</th>
+                    <th style="width: 15%;">名称</th>
+                    <th style="width: 30%;">描述</th>
+                    <th style="width: 15%;">图标</th>
+                    <th style="width: 10%;">排序</th>
+                    <th style="width: 10%;">状态</th>
+                    <th style="width: 12%;">操作</th>
+                </tr>
                 </thead>
                 <tbody>
                 <tr th:each="c : ${categoryList}">
@@ -61,6 +105,9 @@
                         <a href="javascript:void(0)" th:attr="data-id=${c.id}, data-name=${c.name}, data-desc=${c.description}, data-icon=${c.icon}, data-sort=${c.sortOrder}, data-status=${c.status}" class="edit-link">编辑</a>
                         <a th:href="@{/admin/category/del(id=${c.id})}" class="delete" onclick="return confirm('确定删除？')">删除</a>
                     </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(categoryList)}">
+                    <td colspan="7" style="text-align:center;padding:40px;color:#999;">暂无分类数据</td>
                 </tr>
                 </tbody>
             </table>

@@ -176,14 +176,14 @@
         <div class="logo"><h3>校园跳蚤市场</h3><span>后台管理系统</span></div>
         <nav>
             <ul>
-                <li><a href="#">首页概览</a></li>
-                <li><a href="#">商品管理</a></li>
-                <li><a href="#">分类管理</a></li>
-                <li><a href="#">用户管理</a></li>
-                <li><a href="#">交易管理</a></li>
-                <li><a href="#">公告管理</a></li>
-                <li><a href="/fleamarket/admin/message">留言管理</a></li>
-                <li><a href="/fleamarket/admin/report" class="active">举报管理</a></li>
+                <li><a th:href="@{/admin/home}">首页概览</a></li>
+                <li><a th:href="@{/admin/product}">商品管理</a></li>
+                <li><a th:href="@{/admin/category}">分类管理</a></li>
+                <li><a th:href="@{/admin/user}">用户管理</a></li>
+                <li><a th:href="@{/admin/trade}">交易管理</a></li>
+                <li><a th:href="@{/admin/announcement}">公告管理</a></li>
+                <li><a th:href="@{/admin/message}">留言管理</a></li>
+                <li><a th:href="@{/admin/report}" class="active">举报管理</a></li>
             </ul>
         </nav>
         <div class="logout"><a href="#">退出登录</a></div>
@@ -222,10 +222,10 @@
                     </td>
                     <td th:text="${#dates.format(r.createTime, 'yyyy-MM-dd HH:mm')}">2024-01-01</td>
                     <td class="action-btns">
-                        <a th:if="${r.status == 0}" href="javascript:void(0)" class="btn-handle"
-                           th:attr="data-id=${r.id}, data-reason=${r.reason}, data-detail=${r.detail}"
+                        <a href="javascript:void(0)" class="btn-handle"
+                           th:attr="data-id=${r.id}, data-reason=${r.reason}, data-detail=${r.reason}"
                            onclick="openHandleModal(this)">处理</a>
-                        <a th:if="${r.status == 0}" th:href="@{/admin/report(action='reject', reportId=${r.id})}"
+                        <a th:href="@{/admin/report(action='reject', reportId=${r.id})}"
                            class="btn-reject" onclick="return confirm('确定驳回这条举报？')">驳回</a>
                     </td>
                 </tr>

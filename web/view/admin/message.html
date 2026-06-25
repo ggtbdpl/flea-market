@@ -5,29 +5,25 @@
     <title>留言管理</title>
     <link rel="stylesheet" th:href="@{/static/css/admin.css}">
     <style>
-        /* 表格列宽固定 */
-        .data-table th:nth-child(1),
-        .data-table td:nth-child(1) { width: 60px; text-align: center; }
+        .data-table {
+            table-layout: fixed;
+            width: 100%;
+        }
+        .data-table th,
+        .data-table td {
+            padding: 12px 10px;
+            vertical-align: middle;
+            text-align: center;
+        }
 
-        .data-table th:nth-child(2),
-        .data-table td:nth-child(2) { width: 15%; text-align: center; }
+        .content-cell {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            text-align: left;
+            padding-left: 20px;
+        }
 
-        .data-table th:nth-child(3),
-        .data-table td:nth-child(3) { width: 12%; text-align: center; }
-
-        .data-table th:nth-child(4),
-        .data-table td:nth-child(4) { width: 30%; text-align: left; padding-left: 20px; }
-
-        .data-table th:nth-child(5),
-        .data-table td:nth-child(5) { width: 10%; text-align: center; }
-
-        .data-table th:nth-child(6),
-        .data-table td:nth-child(6) { width: 15%; text-align: center; }
-
-        .data-table th:nth-child(7),
-        .data-table td:nth-child(7) { width: 15%; text-align: center; }
-
-        /* 状态标签 — 简洁有辨识度 */
         .status-tag {
             display: inline-block;
             padding: 3px 10px;
@@ -46,21 +42,15 @@
             background: #f2fdf5;
         }
 
-        /* 内容列省略 */
-        .content-cell {
-            max-width: 300px;
-            overflow: hidden;
-            text-overflow: ellipsis;
+        .action-btns {
             white-space: nowrap;
         }
-
-        /* 操作按钮 — 简洁 */
         .action-btns a {
-            padding: 3px 10px;
+            padding: 3px 8px;
             border-radius: 3px;
-            font-size: 13px;
+            font-size: 12px;
             text-decoration: none;
-            margin: 0 2px;
+            margin: 0 3px;
             border: 1px solid;
             transition: all 0.2s;
         }
@@ -85,29 +75,6 @@
         .delete:hover {
             background: #f8e5e5;
         }
-
-        /* 空数据提示 — 简洁大方 */
-        .empty-tip {
-            text-align: center;
-            padding: 80px 20px;
-            color: #999;
-        }
-        .empty-icon {
-            width: 64px;
-            height: 64px;
-            margin: 0 auto 16px;
-            background: #e8e8e8;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 28px;
-            color: #bbb;
-        }
-        .empty-text {
-            font-size: 14px;
-            color: #999;
-        }
     </style>
 </head>
 <body>
@@ -116,16 +83,17 @@
         <div class="logo"><h3>校园跳蚤市场</h3><span>后台管理系统</span></div>
         <nav>
             <ul>
-                <li><a href="#">首页概览</a></li>
-                <li><a href="#">商品管理</a></li>
-                <li><a href="#">分类管理</a></li>
-                <li><a href="#">用户管理</a></li>
-                <li><a href="#">交易管理</a></li>
-                <li><a href="#">公告管理</a></li>
-                <li><a href="/fleamarket/admin/message" class="active">留言管理</a></li>
+                <li><a th:href="@{/admin/home}">首页概览</a></li>
+                <li><a th:href="@{/admin/product}">商品管理</a></li>
+                <li><a th:href="@{/admin/category}">分类管理</a></li>
+                <li><a th:href="@{/admin/user}">用户管理</a></li>
+                <li><a th:href="@{/admin/trade}">交易管理</a></li>
+                <li><a th:href="@{/admin/announcement}">公告管理</a></li>
+                <li><a th:href="@{/admin/message}" class="active">留言管理</a></li>
+                <li><a th:href="@{/admin/report}">举报管理</a></li>
             </ul>
         </nav>
-        <div class="logout"><a href="#">退出登录</a></div>
+        <div class="logout"><a th:href="@{/logout}">退出登录</a></div>
     </aside>
 
     <main class="main-content">
@@ -135,23 +103,23 @@
                 <h2>留言管理</h2>
             </div>
 
-            <table class="data-table" th:if="${not #lists.isEmpty(messageList)}">
+            <table class="data-table">
                 <thead>
                 <tr>
-                    <th>ID</th>
-                    <th>商品</th>
-                    <th>留言用户</th>
-                    <th>内容</th>
-                    <th>状态</th>
-                    <th>时间</th>
-                    <th>操作</th>
+                    <th style="width: 8%;">ID</th>
+                    <th style="width: 12%;">商品</th>
+                    <th style="width: 12%;">留言用户</th>
+                    <th style="width: 30%;">内容</th>
+                    <th style="width: 10%;">状态</th>
+                    <th style="width: 15%;">时间</th>
+                    <th style="width: 13%;">操作</th>
                 </tr>
                 </thead>
                 <tbody>
                 <tr th:each="msg : ${messageList}">
                     <td th:text="${msg.id}">1</td>
-                    <td th:text="${msg.productName}">商品名称</td>
-                    <td th:text="${msg.username}">用户名</td>
+                    <td th:text="${msg.productId}">1</td>
+                    <td th:text="${msg.fromUserId}">2</td>
                     <td class="content-cell" th:text="${msg.content}" th:title="${msg.content}">留言内容</td>
                     <td>
                         <span th:if="${msg.isRead == 0}" class="status-tag status-unread">未读</span>
@@ -160,16 +128,14 @@
                     <td th:text="${#dates.format(msg.createTime, 'yyyy-MM-dd HH:mm')}">2024-01-01</td>
                     <td class="action-btns">
                         <a th:if="${msg.isRead == 0}" th:href="@{/admin/message(action='read', messageId=${msg.id})}" class="btn-read">标记已读</a>
-                        <a th:href="@{/admin/message(action='delete', messageId=${msg.id})}" class="delete" onclick="return confirm('确定删除这条留言？')">删除</a>
+                        <a th:href="@{/admin/message(action='delete', messageId=${msg.id})}" class="delete" onclick="return confirm('确定删除？')">删除</a>
                     </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(messageList)}">
+                    <td colspan="7" style="text-align:center;padding:40px;color:#999;">暂无留言数据</td>
                 </tr>
                 </tbody>
             </table>
-
-            <div class="empty-tip" th:if="${#lists.isEmpty(messageList)}">
-                <div class="empty-icon">!</div>
-                <div class="empty-text">暂无留言数据</div>
-            </div>
         </div>
     </main>
 </div>

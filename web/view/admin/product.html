@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>商品管理</title>
+    <link rel="stylesheet" th:href="@{/static/css/admin.css}">
+    <style>
+        .search-bar {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .search-bar input {
+            flex: 1;
+            padding: 10px 16px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        .search-bar button {
+            padding: 10px 24px;
+            background: #1abc9c;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        .search-bar button:hover {
+            background: #16a085;
+        }
+        .status-tag {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 3px;
+            font-size: 12px;
+            border: 1px solid;
+        }
+        .status-1 {
+            color: #27ae60;
+            border-color: #2ecc71;
+            background: #f2fdf5;
+        }
+        .status-0 {
+            color: #c0392b;
+            border-color: #e74c3c;
+            background: #fdf2f2;
+        }
+        .action-btns a {
+            padding: 3px 10px;
+            border-radius: 3px;
+            font-size: 13px;
+            text-decoration: none;
+            margin: 0 2px;
+            border: 1px solid;
+            transition: all 0.2s;
+        }
+        .action-btns a:hover {
+            opacity: 0.8;
+        }
+        .btn-edit {
+            color: #2980b9;
+            border-color: #3498db;
+            background: #f8fbfd;
+        }
+        .btn-delete {
+            color: #c0392b;
+            border-color: #e74c3c;
+            background: #fdf2f2;
+        }
+        .empty-tip {
+            text-align: center;
+            padding: 80px 20px;
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+<div class="admin-wrapper">
+    <aside class="sidebar">
+        <div class="logo"><h3>校园跳蚤市场</h3><span>后台管理系统</span></div>
+        <nav>
+            <ul>
+                <li><a th:href="@{/admin/home}">首页概览</a></li>
+                <li><a th:href="@{/admin/product}" class="active">商品管理</a></li>
+                <li><a th:href="@{/admin/category}">分类管理</a></li>
+                <li><a th:href="@{/admin/user}">用户管理</a></li>
+                <li><a th:href="@{/admin/trade}">交易管理</a></li>
+                <li><a th:href="@{/admin/announcement}">公告管理</a></li>
+                <li><a th:href="@{/admin/message}">留言管理</a></li>
+                <li><a th:href="@{/admin/report}">举报管理</a></li>
+            </ul>
+        </nav>
+        <div class="logout"><a th:href="@{/logout}">退出登录</a></div>
+    </aside>
+
+    <main class="main-content">
+        <header class="top-bar"><span th:text="'欢迎，' + ${admin.username}">欢迎，管理员</span></header>
+        <div class="content-body">
+            <div class="page-header">
+                <h2>商品管理</h2>
+            </div>
+
+            <!-- 搜索栏 -->
+            <div class="search-bar">
+                <form th:action="@{/Mindex}" method="post" style="display:flex;gap:12px;width:100%;">
+                    <input type="text" name="keyword" th:value="${keyword}" placeholder="搜索商品标题...">
+                    <button type="submit">搜索</button>
+                </form>
+            </div>
+
+            <!-- 商品列表 -->
+            <table class="data-table" th:if="${not #lists.isEmpty(products)}">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>标题</th>
+                    <th>分类</th>
+                    <th>价格</th>
+                    <th>原价</th>
+                    <th>成色</th>
+                    <th>状态</th>
+                    <th>联系人</th>
+                    <th>操作</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="p : ${products}">
+                    <td th:text="${p.id}">1</td>
+                    <td th:text="${p.title}">商品标题</td>
+                    <td th:text="${p.categoryId}">1</td>
+                    <td th:text="'¥' + ${p.price}">10.00</td>
+                    <td th:text="'¥' + ${p.originalPrice}">30.00</td>
+                    <td th:text="${p.condition}">九成新</td>
+                    <td>
+                        <span th:if="${p.status == 1}" class="status-tag status-1">上架</span>
+                        <span th:if="${p.status != 1}" class="status-tag status-0">下架</span>
+                    </td>

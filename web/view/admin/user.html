@@ -4,6 +4,98 @@
     <meta charset="UTF-8">
     <title>用户管理</title>
     <link rel="stylesheet" th:href="@{/static/css/admin.css}">
+    <style>
+        /* 表格列宽固定 */
+        .data-table th:nth-child(1),
+        .data-table td:nth-child(1) { width: 50px; text-align: center; }
+
+        .data-table th:nth-child(2),
+        .data-table td:nth-child(2) { width: 12%; text-align: center; }
+
+        .data-table th:nth-child(3),
+        .data-table td:nth-child(3) { width: 12%; text-align: center; }
+
+        .data-table th:nth-child(4),
+        .data-table td:nth-child(4) { width: 12%; text-align: center; }
+
+        .data-table th:nth-child(5),
+        .data-table td:nth-child(5) { width: 80px; text-align: center; }
+
+        .data-table th:nth-child(6),
+        .data-table td:nth-child(6) { width: 80px; text-align: center; }
+
+        .data-table th:nth-child(7),
+        .data-table td:nth-child(7) { width: 15%; text-align: center; }
+
+        .data-table th:nth-child(8),
+        .data-table td:nth-child(8) { width: 80px; text-align: center; }
+
+        /* 头像样式 */
+        .avatar-img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            display: block;
+            margin: 0 auto;
+        }
+
+        /* 状态标签 */
+        .status-tag {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 3px;
+            font-size: 12px;
+            border: 1px solid;
+        }
+        .status-1 {
+            color: #27ae60;
+            border-color: #2ecc71;
+            background: #f2fdf5;
+        }
+        .status-2 {
+            color: #c0392b;
+            border-color: #e74c3c;
+            background: #fdf2f2;
+        }
+
+        /* 操作按钮 */
+        .action-btns a {
+            padding: 3px 10px;
+            border-radius: 3px;
+            font-size: 13px;
+            text-decoration: none;
+            margin: 0 2px;
+            border: 1px solid;
+            transition: all 0.2s;
+        }
+        .action-btns a:hover {
+            opacity: 0.8;
+        }
+        .btn-toggle {
+            color: #c0392b;
+            border-color: #e74c3c;
+            background: #fdf2f2;
+        }
+        .btn-toggle:hover {
+            background: #f8e5e5;
+        }
+        .btn-enable {
+            color: #27ae60;
+            border-color: #2ecc71;
+            background: #f2fdf5;
+        }
+        .btn-enable:hover {
+            background: #e8f5e9;
+        }
+
+        /* 空数据提示 */
+        .empty-tip {
+            text-align: center;
+            padding: 80px 20px;
+            color: #999;
+        }
+    </style>
 </head>
 <body>
 <div class="admin-wrapper">
@@ -11,13 +103,14 @@
         <div class="logo"><h3>校园跳蚤市场</h3><span>后台管理系统</span></div>
         <nav>
             <ul>
-                <li><a th:href="@{/Mindex}">首页概览</a></li>
-                <li><a th:href="@{/Mindex}">商品管理</a></li>
+                <li><a th:href="@{/admin/home}">首页概览</a></li>
+                <li><a th:href="@{/admin/product}">商品管理</a></li>
                 <li><a th:href="@{/admin/category}">分类管理</a></li>
                 <li><a href="#" class="active">用户管理</a></li>
                 <li><a th:href="@{/admin/trade}">交易管理</a></li>
                 <li><a th:href="@{/admin/announcement}">公告管理</a></li>
-                <li><a href="#">留言管理</a></li>
+                <li><a th:href="@{/admin/message}">留言管理</a></li>
+                <li><a th:href="@{/admin/report}">举报管理</a></li>
             </ul>
         </nav>
         <div class="logout"><a th:href="@{/logout}">退出登录</a></div>
@@ -32,7 +125,16 @@
 
             <table class="data-table">
                 <thead>
-                <tr><th>ID</th><th>用户名</th><th>手机号</th><th>微信</th><th>头像</th><th>状态</th><th>注册时间</th><th>操作</th></tr>
+                <tr>
+                    <th>ID</th>
+                    <th>用户名</th>
+                    <th>手机号</th>
+                    <th>微信</th>
+                    <th>头像</th>
+                    <th>状态</th>
+                    <th>注册时间</th>
+                    <th>操作</th>
+                </tr>
                 </thead>
                 <tbody>
                 <tr th:each="u : ${userList}">
@@ -41,18 +143,18 @@
                     <td th:text="${u.phone}">13800138000</td>
                     <td th:text="${u.wechat}">wx123</td>
                     <td>
-                        <img th:if="${u.avatar != null}" th:src="@{${u.avatar}}" style="width:40px;height:40px;border-radius:50%;object-fit:cover;">
-                        <span th:if="${u.avatar == null}">无</span>
+                        <img th:if="${u.avatar != null and u.avatar != ''}" th:src="@{${u.avatar}}" class="avatar-img" alt="头像">
+                        <span th:if="${u.avatar == null or u.avatar == ''}">无</span>
                     </td>
                     <td>
-                        <span th:if="${u.status == 1}" class="status-1">正常</span>
-                        <span th:if="${u.status != 1}" class="status-2">禁用</span>
+                        <span th:if="${u.status == 1}" class="status-tag status-1">正常</span>
+                        <span th:if="${u.status != 1}" class="status-tag status-2">禁用</span>
                     </td>
                     <td th:text="${u.createTime}">2024-01-01</td>
                     <td class="action-btns">
                         <a th:href="@{/admin/user(action=toggle, id=${u.id}, status=${u.status})}"
                            th:text="${u.status == 1} ? '禁用' : '启用'"
-                           th:class="${u.status == 1} ? 'delete' : ''"
+                           th:class="${u.status == 1} ? 'btn-toggle' : 'btn-enable'"
                            onclick="return confirm('确定要修改该用户状态吗？')">禁用</a>
                     </td>
                 </tr>
