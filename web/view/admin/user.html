@@ -143,8 +143,17 @@
                     <td th:text="${u.phone}">13800138000</td>
                     <td th:text="${u.wechat}">wx123</td>
                     <td>
-                        <img th:if="${u.avatar != null and u.avatar != ''}" th:src="@{${u.avatar}}" class="avatar-img" alt="头像">
-                        <span th:if="${u.avatar == null or u.avatar == ''}">无</span>
+                        <img th:if="${u.avatar != null and u.avatar != ''}"
+                             th:src="@{${u.avatar}}"
+                             style="width:40px;height:40px;border-radius:50%;object-fit:cover;"
+                             onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-flex';">
+                        <div th:if="${u.avatar == null or u.avatar == ''}"
+                             style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg, #667eea 0%, #764ba2 100%);display:inline-flex;align-items:center;justify-content:center;color:white;font-size:14px;font-weight:bold;">
+                            <span th:text="${u.username != null ? u.username.substring(0,1).toUpperCase() : '?'}">?</span>
+                        </div>
+                        <div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg, #667eea 0%, #764ba2 100%);display:none;align-items:center;justify-content:center;color:white;font-size:14px;font-weight:bold;">
+                            <span th:text="${u.username != null ? u.username.substring(0,1).toUpperCase() : '?'}">?</span>
+                        </div>
                     </td>
                     <td>
                         <span th:if="${u.status == 1}" class="status-tag status-1">正常</span>
