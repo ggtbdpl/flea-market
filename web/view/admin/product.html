@@ -5,73 +5,40 @@
     <title>商品管理</title>
     <link rel="stylesheet" th:href="@{/static/css/admin.css}">
     <style>
-        .search-bar {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 20px;
-        }
-        .search-bar input {
-            flex: 1;
-            padding: 10px 16px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            font-size: 14px;
-        }
-        .search-bar button {
-            padding: 10px 24px;
-            background: #1abc9c;
-            color: #fff;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-        }
-        .search-bar button:hover {
-            background: #16a085;
-        }
-        .status-tag {
-            display: inline-block;
-            padding: 3px 10px;
-            border-radius: 3px;
-            font-size: 12px;
-            border: 1px solid;
-        }
-        .status-1 {
-            color: #27ae60;
-            border-color: #2ecc71;
-            background: #f2fdf5;
-        }
-        .status-0 {
-            color: #c0392b;
-            border-color: #e74c3c;
-            background: #fdf2f2;
-        }
-        .action-btns a {
-            padding: 3px 10px;
-            border-radius: 3px;
-            font-size: 13px;
-            text-decoration: none;
-            margin: 0 2px;
-            border: 1px solid;
-            transition: all 0.2s;
-        }
-        .action-btns a:hover {
-            opacity: 0.8;
-        }
-        .btn-edit {
-            color: #2980b9;
-            border-color: #3498db;
-            background: #f8fbfd;
-        }
-        .btn-delete {
-            color: #c0392b;
-            border-color: #e74c3c;
-            background: #fdf2f2;
-        }
-        .empty-tip {
-            text-align: center;
-            padding: 80px 20px;
-            color: #999;
-        }
+        .search-bar { display: flex; gap: 12px; margin-bottom: 20px; }
+        .search-bar input { flex: 1; padding: 10px 16px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; }
+        .search-bar button { padding: 10px 24px; background: #1abc9c; color: #fff; border: none; border-radius: 6px; cursor: pointer; }
+        .search-bar button:hover { background: #16a085; }
+        .status-tag { display: inline-block; padding: 3px 10px; border-radius: 3px; font-size: 12px; border: 1px solid; }
+        .status-0 { color: #f39c12; border-color: #f1c40f; background: #fef9e7; }
+        .status-1 { color: #27ae60; border-color: #2ecc71; background: #f2fdf5; }
+        .status-2 { color: #c0392b; border-color: #e74c3c; background: #fdf2f2; }
+        .status-3 { color: #7f8c8d; border-color: #95a5a6; background: #f4f6f7; }
+        .action-btns a { padding: 3px 10px; border-radius: 3px; font-size: 13px; text-decoration: none; margin: 0 2px; border: 1px solid; transition: all 0.2s; }
+        .action-btns a:hover { opacity: 0.8; }
+        .btn-edit { color: #2980b9; border-color: #3498db; background: #f8fbfd; }
+        .btn-delete { color: #c0392b; border-color: #e74c3c; background: #fdf2f2; }
+        .empty-tip { text-align: center; padding: 80px 20px; color: #999; }
+
+        /* 弹窗样式内联 */
+        .toast-container { position: fixed; top: 80px; left: 50%; transform: translateX(-50%); z-index: 9999; pointer-events: none; }
+        .toast { background: #0a8c7f; color: #fff; padding: 14px 28px; border-radius: 8px; font-size: 14px; box-shadow: 0 4px 16px rgba(10,140,127,0.3); margin-bottom: 10px; opacity: 0; transform: translateY(-20px); transition: all 0.3s ease; pointer-events: auto; display: flex; align-items: center; gap: 8px; min-width: 200px; justify-content: center; }
+        .toast.show { opacity: 1; transform: translateY(0); }
+        .toast.error { background: #e74c3c; box-shadow: 0 4px 16px rgba(231,76,60,0.3); }
+
+        .custom-confirm-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 9998; display: none; justify-content: center; align-items: center; opacity: 0; transition: opacity 0.2s ease; }
+        .custom-confirm-overlay.active { display: flex; opacity: 1; }
+        .custom-confirm-box { background: #fff; border-radius: 12px; padding: 28px 32px; width: 90%; max-width: 360px; box-shadow: 0 10px 40px rgba(0,0,0,0.15); text-align: center; transform: scale(0.9); transition: transform 0.2s ease; }
+        .custom-confirm-overlay.active .custom-confirm-box { transform: scale(1); }
+        .confirm-icon { font-size: 48px; margin-bottom: 12px; }
+        .confirm-title { font-size: 18px; font-weight: 600; color: #333; margin-bottom: 8px; }
+        .confirm-msg { font-size: 14px; color: #666; margin-bottom: 24px; line-height: 1.6; }
+        .confirm-actions { display: flex; gap: 12px; justify-content: center; }
+        .confirm-actions button { padding: 10px 24px; border-radius: 6px; border: none; cursor: pointer; font-size: 14px; transition: all 0.2s; }
+        .btn-cancel { background: #f5f5f5; color: #555; }
+        .btn-cancel:hover { background: #e8e8e8; }
+        .btn-confirm { background: #0a8c7f; color: #fff; }
+        .btn-confirm:hover { background: #097a6e; }
     </style>
 </head>
 <body>
@@ -96,33 +63,15 @@
     <main class="main-content">
         <header class="top-bar"><span th:text="'欢迎，' + ${admin.username}">欢迎，管理员</span></header>
         <div class="content-body">
-            <div class="page-header">
-                <h2>商品管理</h2>
-            </div>
-
-            <!-- 搜索栏 -->
+            <div class="page-header"><h2>商品管理</h2></div>
             <div class="search-bar">
                 <form th:action="@{/admin/product}" method="post" style="display:flex;gap:12px;width:100%;">
                     <input type="text" name="keyword" th:value="${keyword}" placeholder="搜索商品标题...">
                     <button type="submit">搜索</button>
                 </form>
             </div>
-
-            <!-- 商品列表 -->
             <table class="data-table" th:if="${not #lists.isEmpty(products)}">
-                <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>标题</th>
-                    <th>分类</th>
-                    <th>价格</th>
-                    <th>原价</th>
-                    <th>成色</th>
-                    <th>状态</th>
-                    <th>联系人</th>
-                    <th>操作</th>
-                </tr>
-                </thead>
+                <thead><tr><th>ID</th><th>标题</th><th>分类</th><th>价格</th><th>原价</th><th>成色</th><th>状态</th><th>联系人</th><th>操作</th></tr></thead>
                 <tbody>
                 <tr th:each="p : ${products}">
                     <td th:text="${p.id}">1</td>
@@ -132,25 +81,80 @@
                     <td th:text="'¥' + ${p.originalPrice}">30.00</td>
                     <td th:text="${p.condition}">九成新</td>
                     <td>
+                        <span th:if="${p.status == 0}" class="status-tag status-0">待审核</span>
                         <span th:if="${p.status == 1}" class="status-tag status-1">上架</span>
-                        <span th:if="${p.status != 1}" class="status-tag status-0">下架</span>
+                        <span th:if="${p.status == 2}" class="status-tag status-2">下架</span>
+                        <span th:if="${p.status == 3}" class="status-tag status-3">已售出</span>
                     </td>
                     <td th:text="${p.contact}">微信:test</td>
                     <td class="action-btns">
                         <a th:href="@{/Medit(pid=${p.id})}" class="btn-edit">编辑</a>
                         <a th:href="@{/Mdetail(pid=${p.id})}" class="btn-edit">详情</a>
-                        <a th:href="@{/admin/product(action='del', id=${p.id})}" class="btn-delete" onclick="return confirm('确定删除该商品？')">删除</a>
+                        <a href="javascript:void(0)" class="btn-delete" th:attr="data-url=@{/admin/product(action='del', id=${p.id})}" onclick="handleDelete(this, '确定删除该商品？')">删除</a>
                     </td>
                 </tr>
                 </tbody>
             </table>
-
-            <!-- 无数据时显示提示 -->
-            <div class="empty-tip" th:if="${#lists.isEmpty(products)}">
-                暂无商品数据
-            </div>
+            <div class="empty-tip" th:if="${#lists.isEmpty(products)}">暂无商品数据</div>
         </div>
     </main>
 </div>
+
+<div id="toastContainer" class="toast-container"></div>
+
+<div id="confirmOverlay" class="custom-confirm-overlay">
+    <div class="custom-confirm-box">
+        <div class="confirm-icon">⚠️</div>
+        <div class="confirm-title">确认删除</div>
+        <div class="confirm-msg" id="confirmMsg">确定要执行此操作吗？</div>
+        <div class="confirm-actions">
+            <button class="btn-cancel" onclick="closeConfirm()">取消</button>
+            <button class="btn-confirm" id="confirmBtn">确定</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    function showToast(msg, type) {
+        type = type || 'success';
+        var container = document.getElementById('toastContainer');
+        var toast = document.createElement('div');
+        toast.className = 'toast ' + type;
+        toast.innerHTML = (type === 'success' ? '✅ ' : '❌ ') + msg;
+        container.appendChild(toast);
+        setTimeout(function() { toast.classList.add('show'); }, 10);
+        setTimeout(function() {
+            toast.classList.remove('show');
+            setTimeout(function() { toast.remove(); }, 300);
+        }, 2000);
+    }
+
+    var confirmCallback = null;
+    function showConfirm(msg, callback) {
+        confirmCallback = callback;
+        document.getElementById('confirmMsg').textContent = msg;
+        document.getElementById('confirmOverlay').classList.add('active');
+    }
+    function closeConfirm() {
+        document.getElementById('confirmOverlay').classList.remove('active');
+        confirmCallback = null;
+    }
+    document.getElementById('confirmBtn').addEventListener('click', function() {
+        if (confirmCallback) confirmCallback();
+        closeConfirm();
+    });
+    document.getElementById('confirmOverlay').addEventListener('click', function(e) {
+        if (e.target === this) closeConfirm();
+    });
+
+    function handleDelete(el, msg) {
+        showConfirm(msg, function() {
+            showToast('删除成功！', 'success');
+            setTimeout(function() {
+                window.location.href = el.getAttribute('data-url');
+            }, 600);
+        });
+    }
+</script>
 </body>
 </html>

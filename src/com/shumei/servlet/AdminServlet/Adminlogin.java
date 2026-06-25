@@ -35,7 +35,7 @@ public class Adminlogin extends ViewBaseServlet {
         } else {
             HttpSession session = request.getSession();
             session.setAttribute("admin", admin);
-            response.sendRedirect(request.getContextPath() + "/admin/category");
+            response.sendRedirect(request.getContextPath() + "/admin/home");
         }
     }
 }
