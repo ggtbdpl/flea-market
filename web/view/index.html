@@ -2387,7 +2387,13 @@
                 <span class="iconfont icon-zhanghu"></span>
                 <span th:text="${session.user.nickname}">用户</span></a>
         </th:block>
-        <a href="#" class="publish-btn"><span class="iconfont icon-jiahao"></span> 发布商品</a>
+        <th:block th:if="${session.user != null}">
+        <a th:href="@{/publish}" class="publish-btn"><span class="iconfont icon-jiahao"></span> 发布商品</a>
+    </th:block>
+        <th:block th:if="${session.user == null}">
+            <a href="#" class="publish-btn" id="publishBtn"><span class="iconfont icon-jiahao"></span> 发布商品</a>
+        </th:block>
+
     </div>
 </header>
 
@@ -2396,7 +2402,7 @@
         <li><a href="#">首页</a></li>
         <li><a href="#">全部商品</a></li>
         <li><a href="#">最新发布</a></li>
-        <li><a href="#">热门好物</a></li>
+        <li><a href="#">热门好物</a></li>0
         <li><a href="#">校内跑腿</a></li>
         <li><a href="#">物品互换</a></li>
         <li><a href="#">平台活动</a></li>
@@ -2586,64 +2592,7 @@
     </div>
 </footer>
 
-<!-- 发布商品模态框 -->
-<div id="publishModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h2>发布商品</h2>
-            <span class="modal-close">&times;</span>
-        </div>
-        <div class="modal-body">
-            <form id="publishForm">
-                <div class="form-group">
-                    <label for="productName">商品名称 *</label>
-                    <input type="text" id="productName" placeholder="例如：联想笔记本电脑 i7 16G" required>
-                </div>
-                <div class="form-group">
-                    <label for="productCategory">商品分类 *</label>
-                    <select id="productCategory" name="categoryId" required>
-                        <option value="">选择分类</option>
-                        <option th:each="c : ${categoryList}" th:value="${c.id}" th:text="${c.name}"></option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="productPrice">价格 *</label>
-                    <div class="price-input">
-                        <span>¥</span>
-                        <input type="number" id="productPrice" placeholder="0.00" min="0" step="0.01" required>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="productDescription">商品描述 *</label>
-                    <textarea id="productDescription" rows="4" placeholder="请详细描述您的商品，包括新旧程度、使用情况、配件等..." required></textarea>
-                </div>
-                <div class="form-group">
-                    <label>商品图片</label>
-                    <div class="image-upload-area">
-                        <div class="upload-placeholder">
-                            <svg class="upload-icon" viewBox="0 0 24 24">
-                                <path d="M19,13h-6v6h-2v-6H5v-2h6V5h2v6h6V13z"/>
-                            </svg>
-                            <p>点击上传图片</p>
-                            <p class="upload-hint">支持 JPG, PNG 格式，最多5张</p>
-                        </div>
-                    </div>
-                    <div class="image-preview-container">
-                        <!-- 图片预览区域 -->
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="contact">联系方式 *</label>
-                    <input type="text" id="contact" placeholder="手机号或微信号" required>
-                </div>
-                <div class="form-actions">
-                    <button type="button" class="btn-secondary modal-close">取消</button>
-                    <button type="submit" class="btn-primary">发布商品</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
+
 
 <!-- 登录模态框 -->
 <div id="loginModal" class="modal">
@@ -2938,6 +2887,13 @@
             setTimeout(tryOpen, 200); // 延迟确保script.js已执行
         }
     })();
+    const publishBtn = document.getElementById('publishBtn');
+    if (publishBtn) {
+        publishBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            openLoginModal();
+        });
+    }
 </script>
 
 </body>

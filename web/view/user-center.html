@@ -186,7 +186,13 @@
 <div class="layout">
     <aside class="sidebar">
         <div class="menu-group">
+            <div class="menu-item" onclick="location.href='[[@{/publish}]]'" style="color:var(--primary); font-weight:600;">
+                <span>+ 发布闲置</span>
+            </div>
+        </div>
+        <div class="menu-group">
             <div class="menu-title">我的交易</div>
+
             <div class="menu-item active" onclick="switchMenu('publish')">
                 <span>我发布的</span>
                 <span class="menu-count" th:text="${myProducts != null ? myProducts.size() : 0}">0</span>

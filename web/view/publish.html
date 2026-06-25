@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>发布闲置 - 校园跳蚤市场</title>
+    <style>
+        :root { --primary:#0a8c7f; --primary-hover:#097a6e; --bg:#f5f7fa; --text:#333; --text-secondary:#666; --border:#eee; }
+        * { margin:0; padding:0; box-sizing:border-box; font-family:"Microsoft YaHei",sans-serif; }
+        body { background:var(--bg); padding-top:56px; }
+        header {
+            position:fixed; top:0; left:0; width:100%; z-index:1000; background:#fff;
+            padding:0 40px; height:56px; display:flex; align-items:center; justify-content:space-between;
+            border-bottom:2px solid var(--primary); box-shadow:0 2px 8px rgba(0,0,0,0.06);
+        }
+        .logo { display:flex; align-items:center; gap:10px; text-decoration:none; }
+        .logo img { height:36px; border-radius:4px; }
+        .logo span { color:var(--primary); font-size:20px; font-weight:bold; }
+        .nav-back a { color:var(--text-secondary); text-decoration:none; font-size:14px; transition:0.3s; }
+        .nav-back a:hover { color:var(--primary); }
+        .container { max-width:700px; margin:40px auto; padding:0 20px; }
+        .card { background:#fff; border-radius:12px; box-shadow:0 2px 12px rgba(0,0,0,0.06); padding:32px; }
+        .card h2 { font-size:20px; margin-bottom:24px; padding-bottom:16px; border-bottom:1px solid var(--border); }
+        .form-row { display:flex; align-items:center; margin-bottom:20px; gap:16px; }
+        .form-row.top { align-items:flex-start; }
+        .form-label { width:80px; color:var(--text-secondary); font-size:14px; text-align:right; flex-shrink:0; }
+        .form-input, .form-select, .form-textarea {
+            flex:1; padding:10px 14px; border:1px solid var(--border); border-radius:8px;
+            font-size:14px; outline:none; transition:0.3s;
+        }
+        .form-input:focus, .form-select:focus, .form-textarea:focus { border-color:var(--primary); }
+        .form-textarea { min-height:120px; resize:vertical; }
+        .form-select { background:#fff; cursor:pointer; }
+        .file-input { position:absolute; opacity:0; width:0; height:0; }
+        .file-btn {
+            display:inline-block; padding:8px 20px; background:var(--primary);
+            color:#fff; border-radius:6px; font-size:13px; cursor:pointer;
+            transition:0.3s;
+        }
+        .file-btn:hover { background:var(--primary-hover); }
+        .hint { font-size:12px; color:#999; margin-top:6px; }
+        .error { color:#e74c3c; font-size:13px; margin-bottom:16px; background:#fff0f0; padding:10px 14px; border-radius:6px; }
+        .btn-group { display:flex; gap:12px; margin-top:32px; padding-left:96px; }
+        .btn {
+            padding:10px 32px; border:none; border-radius:8px; font-size:15px;
+            cursor:pointer; transition:0.3s; text-align:center; text-decoration:none;
+        }
+        .btn-primary { background:var(--primary); color:#fff; }
+        .btn-primary:hover { background:var(--primary-hover); }
+        .btn-secondary { background:#f5f7fa; color:var(--text); border:1px solid var(--border); }
+        .btn-secondary:hover { background:#eee; }
+        @media (max-width:600px) {
+            .form-row { flex-direction:column; align-items:flex-start; gap:6px; }
+            .form-label { text-align:left; width:auto; }
+            .btn-group { padding-left:0; }
+        }
+    </style>
+</head>
+<body>
+<header>
+    <a th:href="@{/index}" class="logo">
+        <img th:src="@{/static/images/logo.png}" alt="logo">
+        <span>校园跳蚤市场</span>
+    </a>
+    <div class="nav-back">
+        <a th:href="@{/user/center}">← 返回个人中心</a>
+    </div>
+</header>
+
+<div class="container">
+    <div class="card">
+        <h2>发布闲置</h2>
+        <div class="error" th:if="${msg != null}" th:text="${msg}"></div>
+        <form th:action="@{/publish}" method="post" enctype="multipart/form-data">
+
+            <div class="form-row">
+                <label class="form-label">标题</label>
+                <input type="text" name="title" class="form-input" placeholder="商品名称" required>
+            </div>
+
+            <div class="form-row">
+                <label class="form-label">分类</label>
+                <select name="categoryId" class="form-select" required>
+                    <option value="">请选择分类</option>
+                    <option th:each="c : ${categories}" th:value="${c.id}" th:text="${c.name}">分类名</option>
+                </select>
+            </div>
+
+            <div class="form-row">
+                <label class="form-label">价格</label>
+                <input type="number" name="price" class="form-input" placeholder="¥ 售价" step="0.01" min="0" required>
+            </div>
+
+            <div class="form-row">
+                <label class="form-label">原价</label>
+                <input type="number" name="originalPrice" class="form-input" placeholder="¥ 原价（选填）" step="0.01" min="0">
+            </div>
+
+            <div class="form-row">
+                <label class="form-label">成色</label>
+                <select name="condition" class="form-select">
+                    <option value="全新">全新</option>
+                    <option value="99新" selected>99新</option>
+                    <option value="9成新">9成新</option>
+                    <option value="8成新">8成新</option>
+                    <option value="7成新及以下">7成新及以下</option>
+                </select>
+            </div>
+
+            <div class="form-row top">
+                <label class="form-label">描述</label>
+                <textarea name="description" class="form-textarea" placeholder="描述一下商品的品牌、型号、使用情况等"></textarea>
+            </div>
+
+            <div class="form-row">
+                <label class="form-label">联系方式</label>
+                <input type="text" name="contact" class="form-input" placeholder="手机号/微信/QQ">
+            </div>
+
+            <div class="form-row">
+                <label class="form-label">封面图</label>
+                <div>
+                    <input type="file" id="coverInput" name="coverImage" class="file-input" accept="image/*" required>
+                    <label for="coverInput" class="file-btn">选择封面</label>
+                    <div class="hint">支持 jpg/png/gif，将作为商品列表展示图</div>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <label class="form-label">详情图</label>
+                <div>
+                    <input type="file" id="detailInput" name="detailImages" class="file-input" accept="image/*" multiple>
+                    <label for="detailInput" class="file-btn">选择图片（可多选）</label>
+                    <div class="hint">支持多张，将在商品详情页展示</div>
+                </div>
+            </div>
+
+            <div class="btn-group">
+                <a th:href="@{/user/center}" class="btn btn-secondary">取消</a>
+                <button type="submit" class="btn btn-primary">立即发布</button>
+            </div>
+        </form>
+    </div>
+</div>
+</body>
+</html>

@@ -139,7 +139,7 @@ public class ProductDAOImpl implements ProductDAO {
         PreparedStatement ps = null;
         try {
             conn = DBUtil.getConnection();
-            String sql = "INSERT INTO product (title, category_id, price, original_price, `condition`, description, image, images, contact, user_id, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            String sql = "INSERT INTO product (title, category_id, price, original_price, `condition`, description, image, images, contact, user_id, status, create_time, update_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())\n";
             ps = conn.prepareStatement(sql);
             ps.setString(1, product.getTitle());
             ps.setInt(2, product.getCategoryId() != null ? product.getCategoryId() : 0);

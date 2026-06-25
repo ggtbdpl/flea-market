@@ -12,5 +12,4 @@ public interface ProductDAO {
     boolean updateProduct(Product product);
     boolean delProduct(int id);
     int updateStatus(Integer id, Integer status);
-
 }
