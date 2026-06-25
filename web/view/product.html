@@ -1,37 +1,476 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>文创产品详情</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${product.title} + ' - 校园跳蚤市场'">商品详情</title>
+    <style>
+        :root {
+            --bg-primary: #f5f7fa;
+            --bg-secondary: #ffffff;
+            --text-primary: #333333;
+            --text-secondary: #666666;
+            --text-muted: #888888;
+            --accent-color: #0a8c7f;
+            --accent-hover: #0d9e8f;
+            --accent-light: #a8e6cf;
+            --border-color: #e0e0e0;
+            --shadow: 0 2px 12px rgba(0,0,0,0.06);
+        }
+        * { margin:0; padding:0; box-sizing:border-box; font-family: "Microsoft YaHei", sans-serif; }
+        body { background-color: var(--bg-primary); color: var(--text-primary); padding-top: 70px; }
+
+        header {
+            position: fixed; top: 0; left: 0; width: 100%; z-index: 1000;
+            background: var(--bg-secondary); padding: 15px 50px; border-bottom: 1px solid #eee;
+            display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+        .logo img { width: 42px; height: 42px; }
+        .logo-text { display: flex; flex-direction: column; }
+        .logo-main { font-size: 22px; font-weight: bold; color: var(--accent-color); }
+        .logo-sub { font-size: 12px; color: var(--text-secondary); }
+        .nav-back a { color: var(--accent-color); text-decoration: none; font-size: 15px; transition: 0.3s; }
+        .nav-back a:hover { color: var(--accent-hover); }
+
+        .container { max-width: 1100px; margin: 30px auto; padding: 0 20px; }
+
+        .detail-wrapper {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 30px;
+            background: var(--bg-secondary); border-radius: 12px; padding: 30px;
+            box-shadow: var(--shadow);
+        }
+
+        .image-section { display: flex; flex-direction: column; gap: 12px; }
+        .main-image {
+            width: 100%; height: 400px; object-fit: cover; border-radius: 10px;
+            background: #f5f5f5; cursor: pointer;
+        }
+        .thumb-list {
+            display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px;
+        }
+        .thumb-item {
+            width: 70px; height: 70px; object-fit: cover; border-radius: 6px;
+            border: 2px solid transparent; cursor: pointer; opacity: 0.7;
+            transition: 0.2s;
+        }
+        .thumb-item:hover, .thumb-item.active {
+            border-color: var(--accent-color); opacity: 1;
+        }
+
+        .info-section { display: flex; flex-direction: column; gap: 16px; }
+        .product-title { font-size: 24px; font-weight: bold; line-height: 1.4; }
+        .price-row { display: flex; align-items: baseline; gap: 12px; }
+        .price-current { font-size: 32px; color: #e74c3c; font-weight: bold; }
+        .price-original { font-size: 16px; color: #999; text-decoration: line-through; }
+        .meta-row { display: flex; flex-wrap: wrap; gap: 10px; }
+        .meta-tag {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 5px 12px; background: #f5f7fa; border-radius: 20px;
+            font-size: 13px; color: var(--text-secondary);
+        }
+        .meta-tag.accent { background: rgba(10,140,127,0.08); color: var(--accent-color); }
+        .meta-tag.sold { background: #fff0f0; color: #c0392b; }
+
+        .section-label { font-size: 13px; color: var(--text-muted); margin-bottom: 4px; }
+        .section-content { font-size: 14px; color: var(--text-secondary); line-height: 1.8; }
+
+        .action-btns { display: flex; gap: 12px; margin-top: 8px; }
+        .btn {
+            flex: 1; padding: 12px 0; border: none; border-radius: 8px;
+            font-size: 15px; cursor: pointer; transition: 0.3s; text-align: center;
+        }
+        .btn-primary { background: var(--accent-color); color: #fff; }
+        .btn-primary:hover { background: var(--accent-hover); }
+        .btn-primary:disabled { background: #ccc; cursor: not-allowed; }
+        .btn-secondary { background: #f5f7fa; color: var(--text-primary); border: 1px solid var(--border-color); }
+        .btn-secondary:hover { background: #eee; }
+        .btn-danger { background: #e74c3c; color: #fff; }
+        .btn-danger:hover { background: #c0392b; }
+
+        .seller-card {
+            display: flex; align-items: center; gap: 15px;
+            padding: 15px; background: #f9f9f9; border-radius: 10px;
+        }
+        .seller-avatar {
+            width: 50px; height: 50px; border-radius: 50%;
+            background: linear-gradient(135deg, #0a8c7f 0%, #a8e6cf 100%);
+            display: flex; align-items: center; justify-content: center;
+            color: #fff; font-size: 20px; font-weight: bold;
+        }
+        .seller-info h4 { font-size: 16px; margin-bottom: 4px; }
+        .seller-info p { font-size: 13px; color: #888; }
+
+        .contact-box {
+            padding: 12px; background: rgba(10,140,127,0.06); border-radius: 8px;
+            border: 1px solid rgba(10,140,127,0.15);
+        }
+        .contact-box .section-content { color: var(--accent-color); font-weight: 500; }
+
+        .message-section {
+            background: var(--bg-secondary); border-radius: 12px; padding: 30px;
+            box-shadow: var(--shadow); margin-top: 25px;
+        }
+        .section-title {
+            font-size: 18px; color: #333; margin-bottom: 20px;
+            padding-left: 12px; border-left: 4px solid var(--accent-color);
+        }
+        .msg-list { display: flex; flex-direction: column; gap: 16px; }
+        .msg-item {
+            padding: 16px; background: #f9f9f9; border-radius: 10px;
+        }
+        .msg-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 8px;
+        }
+        .msg-user { font-weight: bold; color: var(--accent-color); font-size: 14px; }
+        .msg-time { font-size: 12px; color: #aaa; }
+        .msg-content { font-size: 14px; color: var(--text-secondary); line-height: 1.6; }
+        .msg-reply {
+            margin-top: 10px; padding: 10px; background: rgba(10,140,127,0.05);
+            border-radius: 8px; border-left: 3px solid var(--accent-color);
+        }
+        .msg-reply-label { font-size: 12px; color: var(--accent-color); margin-bottom: 4px; }
+        .msg-reply-content { font-size: 13px; color: var(--text-secondary); }
+
+        .msg-form {
+            margin-top: 20px; display: flex; gap: 10px;
+        }
+        .msg-input {
+            flex: 1; padding: 10px 14px; border: 1px solid var(--border-color);
+            border-radius: 8px; font-size: 14px; outline: none;
+        }
+        .msg-input:focus { border-color: var(--accent-color); }
+
+        .reply-form { margin-top: 10px; display: none; gap: 8px; }
+        .reply-form.show { display: flex; }
+
+        .report-btn {
+            margin-top: 15px; color: #999; font-size: 13px; cursor: pointer;
+            display: inline-block;
+        }
+        .report-btn:hover { color: #e74c3c; }
+
+        .modal-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); z-index: 2000; justify-content: center; align-items: center;
+        }
+        .modal-overlay.show { display: flex; }
+        .modal-box {
+            background: #fff; border-radius: 12px; padding: 30px; width: 90%; max-width: 400px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        .modal-title { font-size: 18px; margin-bottom: 20px; }
+        .modal-options { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+        .modal-option {
+            display: flex; align-items: center; gap: 8px; padding: 10px;
+            border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer;
+        }
+        .modal-option:hover { border-color: var(--accent-color); }
+        .modal-option input { accent-color: var(--accent-color); }
+        .modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
+        .modal-actions .btn { flex: none; padding: 8px 20px; }
+
+        footer {
+            background: #333; color: #999; padding: 25px 0; margin-top: 40px; text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            .detail-wrapper { grid-template-columns: 1fr; }
+            .main-image { height: 280px; }
+            body { padding-top: 60px; }
+            header { padding: 12px 20px; }
+        }
+    </style>
 </head>
 <body>
-<!--根据属性查询-->
-名称:<span th:text="${mingcheng}"></span>
-单价:<span th:text="${danjia}"></span>
-库存:<span th:text="${kucun}"></span>
-照片:<span th:text="${tupian}"></span>
-<hr>
-<!--根据对象查询-->
-名称：<span th:text="${product.getPname()}"></span>
-价格：<span th:text="${product.getPrice()}"></span>
-库存：<span th:text="${product.getStock()}"></span>
-照片：<span th:text="${product.getImg()}"></span>
 
-<!--对象2-->
-<hr>
-<div th:object="${product}">
-    <!--/*@thymesVar id="product" type="com.shumei.pojo.Product"*/-->
-    名称：<span th:text="*{pname}"></span>
-    价格：<span th:text="*{price}"></span>
-    库存：<span th:text="*{stock}"></span>
-    照片：<span th:text="*{img}"></span>
+<header>
+    <a th:href="@{/index}" class="logo">
+        <img th:src="@{/static/images/logo.png}" alt="logo">
+        <div class="logo-text">
+            <div class="logo-main">校园跳蚤市场</div>
+            <div class="logo-sub">二手好物 · 环保便捷</div>
+        </div>
+    </a>
+    <div class="nav-back">
+        <a th:href="@{/index}">← 返回首页</a>
+    </div>
+</header>
+
+<div class="container">
+    <div class="detail-wrapper">
+        <!-- 左侧图片 -->
+        <div class="image-section">
+            <img id="mainImage" class="main-image"
+                 th:src="@{'/static/images/' + ${imageList != null and imageList.length > 0 ? imageList[0] : product.image}}"
+                 th:alt="${product.title}" onerror="this.style.display='none'"/>
+
+            <div class="thumb-list" th:if="${imageList != null and imageList.length > 1}">
+                <img th:each="img,iter : ${imageList}"
+                     th:src="@{'/static/images/' + ${img}}"
+                     th:class="'thumb-item ' + ${iter.index == 0 ? 'active' : ''}"
+                     onclick="switchImage(this)"/>
+            </div>
+        </div>
+
+        <!-- 右侧信息 -->
+        <div class="info-section">
+            <h1 class="product-title" th:text="${product.title}">商品标题</h1>
+
+            <div class="price-row">
+                <span class="price-current" th:text="'¥' + ${product.price}">¥999</span>
+                <span class="price-original" th:if="${product.originalPrice != null}" th:text="'¥' + ${product.originalPrice}">¥1999</span>
+            </div>
+
+            <div class="meta-row">
+                <span class="meta-tag accent" th:text="${product.condition}">9成新</span>
+                <span class="meta-tag" th:if="${category != null}" th:text="${category.name}">分类</span>
+                <span class="meta-tag" th:switch="${product.status}">
+                    <span th:case="0">待审核</span>
+                    <span th:case="1">上架中</span>
+                    <span th:case="2">已下架</span>
+                    <span th:case="3" class="meta-tag sold">已售出</span>
+                </span>
+                <span class="meta-tag" th:text="'发布于 ' + ${product.createTime}">发布时间</span>
+            </div>
+
+            <div>
+                <div class="section-label">商品描述</div>
+                <div class="section-content" th:text="${product.description}">暂无描述</div>
+            </div>
+
+            <div class="contact-box">
+                <div class="section-label">联系方式</div>
+                <div class="section-content" th:text="${product.contact}">暂无联系方式</div>
+            </div>
+
+            <!-- 交易按钮 -->
+            <div class="action-btns" th:if="${product.status != null}">
+                <!-- 未登录 -->
+                <button th:if="${currentUser == null and product.status == 1}" class="btn btn-primary" onclick="alert('请先登录')">立即购买</button>
+
+                <!-- 登录且是卖家自己 -->
+                <button th:if="${currentUser != null and product.userId != null and product.userId == currentUser.id}" class="btn btn-secondary" disabled>我的商品</button>
+
+                <!-- 上架中，可购买 -->
+                <button th:if="${currentUser != null and product.userId != null and product.userId != currentUser.id and product.status == 1}"
+                        class="btn btn-primary" th:onclick="'createTrade(' + ${product.id} + ')'">立即购买</button>
+
+                <!-- 已售出 -->
+                <div th:if="${product.status == 3}" style="width:100%;">
+                    <button th:if="${currentTrade == null}" class="btn btn-secondary" disabled>已售出</button>
+
+                    <!-- 买家视角 -->
+                    <button th:if="${currentTrade != null and currentTrade.buyerId == currentUser.id and currentTrade.status == 'pending'}"
+                            class="btn btn-secondary" disabled>等待卖家确认</button>
+                    <button th:if="${currentTrade != null and currentTrade.buyerId == currentUser.id and currentTrade.status == 'contacting'}"
+                            class="btn btn-danger" th:onclick="'receiveTrade(' + ${currentTrade.id} + ')'">确认收货</button>
+                    <button th:if="${currentTrade != null and currentTrade.buyerId == currentUser.id and currentTrade.status == 'completed'}"
+                            class="btn btn-secondary" disabled>交易完成</button>
+
+                    <!-- 卖家视角 -->
+                    <button th:if="${currentTrade != null and currentTrade.sellerId == currentUser.id and currentTrade.status == 'pending'}"
+                            class="btn btn-primary" th:onclick="'confirmTrade(' + ${currentTrade.id} + ')'">确认交易</button>
+                    <button th:if="${currentTrade != null and currentTrade.sellerId == currentUser.id and currentTrade.status == 'contacting'}"
+                            class="btn btn-secondary" disabled>等待买家确认收货</button>
+                    <button th:if="${currentTrade != null and currentTrade.sellerId == currentUser.id and currentTrade.status == 'completed'}"
+                            class="btn btn-secondary" disabled>交易完成</button>
+                </div>
+            </div>
+
+            <div th:if="${seller != null}">
+                <div class="section-label">卖家信息</div>
+                <div class="seller-card">
+                    <div class="seller-avatar" th:text="${seller.nickname != null ? #strings.substring(seller.nickname,0,1) : '卖'}">卖</div>
+                    <div class="seller-info">
+                        <h4 th:text="${seller.nickname}">卖家昵称</h4>
+                        <p th:text="'用户名: ' + ${seller.username}">用户名</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="report-btn" onclick="openReport()">
+                举报此商品
+            </div>
+        </div>
+    </div>
+
+    <!-- 留言面板 -->
+    <div class="message-section">
+        <h3 class="section-title">商品留言</h3>
+
+        <div class="msg-list" th:if="${messages != null and !messages.isEmpty()}">
+            <div class="msg-item" th:each="msg : ${messages}">
+                <div class="msg-header">
+                    <span class="msg-user" th:text="${messageUserNames[msg.fromUserId]}">用户</span>
+                    <span class="msg-time" th:text="${msg.createTime}">时间</span>
+                </div>
+                <div class="msg-content" th:text="${msg.content}">留言内容</div>
+
+                <div class="msg-reply" th:if="${msg.replyContent != null}">
+                    <div class="msg-reply-label">卖家回复</div>
+                    <div class="msg-reply-content" th:text="${msg.replyContent}">回复内容</div>
+                </div>
+
+                <div class="reply-form" th:if="${currentUser != null and product.userId != null and product.userId == currentUser.id and msg.replyContent == null}"
+                     th:id="'replyForm-' + ${msg.id}">
+                    <input type="text" class="msg-input" th:id="'replyInput-' + ${msg.id}" placeholder="回复买家..."/>
+                    <button class="btn btn-primary" style="flex:none;padding:10px 16px;" th:onclick="'submitReply(' + ${msg.id} + ')'">回复</button>
+                </div>
+                <button th:if="${currentUser != null and product.userId != null and product.userId == currentUser.id and msg.replyContent == null}"
+                        class="btn btn-secondary" style="margin-top:8px;padding:6px 12px;font-size:12px;"
+                        th:onclick="'toggleReply(' + ${msg.id} + ')'">回复</button>
+            </div>
+        </div>
+
+        <div th:if="${messages == null or messages.isEmpty()}" style="color:#999;text-align:center;padding:40px;">
+            暂无留言，来说两句吧~
+        </div>
+
+        <div class="msg-form" th:if="${currentUser != null}">
+            <input type="text" id="msgContent" class="msg-input" placeholder="输入你的留言..."/>
+            <button class="btn btn-primary" style="flex:none;padding:10px 20px;" onclick="submitMessage()">发表留言</button>
+        </div>
+        <div th:if="${currentUser == null}" style="text-align:center;margin-top:15px;color:#999;">
+            <a th:href="@{/index(showLogin=1)}" style="color:var(--accent-color);">登录</a>
+            后参与留言
+        </div>
+    </div>
 </div>
 
-<div th:if="${product.stock>0}">
-    <p>库存充足</p>
+<!-- 举报模态框 -->
+<div id="reportModal" class="modal-overlay" onclick="if(event.target===this)closeReport()">
+    <div class="modal-box">
+        <h3 class="modal-title">举报商品</h3>
+        <div class="modal-options">
+            <label class="modal-option">
+                <input type="radio" name="reportReason" value="虚假信息" checked/>
+                <span>虚假信息</span>
+            </label>
+            <label class="modal-option">
+                <input type="radio" name="reportReason" value="诈骗"/>
+                <span>诈骗</span>
+            </label>
+            <label class="modal-option">
+                <input type="radio" name="reportReason" value="违禁品"/>
+                <span>违禁品</span>
+            </label>
+            <label class="modal-option">
+                <input type="radio" name="reportReason" value="其他"/>
+                <span>其他</span>
+            </label>
+        </div>
+        <div class="modal-actions">
+            <button class="btn btn-secondary" onclick="closeReport()">取消</button>
+            <button class="btn btn-danger" onclick="submitReport()">提交举报</button>
+        </div>
+    </div>
 </div>
-<div th:unless="${product.stock>0}">
-    <p>售罄</p>
-</div>
+
+<footer>
+    <div class="copyright">
+        <p>&copy; 2026 校园跳蚤市场 版权所有 | 仅供校内使用</p>
+    </div>
+</footer>
+
+<script th:inline="javascript">
+    var productId = [[${product.id}]];
+
+    function switchImage(thumb) {
+        document.getElementById('mainImage').src = thumb.src;
+        document.querySelectorAll('.thumb-item').forEach(function(t) {
+            t.classList.remove('active');
+        });
+        thumb.classList.add('active');
+    }
+
+    function createTrade(pid) {
+        if (!confirm('确认购买？将扣除 ¥' + [[${product.price}]] + ' 虚拟货币')) return;
+        fetch('trade', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: 'action=create&productId=' + pid
+        }).then(function(r) { return r.json(); }).then(function(data) {
+            alert(data.msg);
+            if (data.success) location.reload();
+        });
+    }
+
+    function confirmTrade(tid) {
+        if (!confirm('确认交易？买家将可以确认收货')) return;
+        fetch('trade', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: 'action=confirm&tradeId=' + tid
+        }).then(function(r) { return r.json(); }).then(function(data) {
+            alert(data.msg);
+            if (data.success) location.reload();
+        });
+    }
+
+    function receiveTrade(tid) {
+        if (!confirm('确认收货？交易将完成，款项将转给卖家')) return;
+        fetch('trade', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: 'action=receive&tradeId=' + tid
+        }).then(function(r) { return r.json(); }).then(function(data) {
+            alert(data.msg);
+            if (data.success) location.reload();
+        });
+    }
+
+    function submitMessage() {
+        var content = document.getElementById('msgContent').value.trim();
+        if (!content) { alert('请输入留言内容'); return; }
+        fetch('message', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: 'productId=' + productId + '&content=' + encodeURIComponent(content)
+        }).then(function(r) { return r.json(); }).then(function(data) {
+            alert(data.msg);
+            if (data.success) location.reload();
+        });
+    }
+
+    function toggleReply(msgId) {
+        var form = document.getElementById('replyForm-' + msgId);
+        form.classList.toggle('show');
+    }
+
+    function submitReply(msgId) {
+        var content = document.getElementById('replyInput-' + msgId).value.trim();
+        if (!content) { alert('请输入回复内容'); return; }
+        fetch('message', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: 'productId=' + productId + '&replyId=' + msgId + '&replyContent=' + encodeURIComponent(content)
+        }).then(function(r) { return r.json(); }).then(function(data) {
+            alert(data.msg);
+            if (data.success) location.reload();
+        });
+    }
+
+    function openReport() {
+        document.getElementById('reportModal').classList.add('show');
+    }
+    function closeReport() {
+        document.getElementById('reportModal').classList.remove('show');
+    }
+    function submitReport() {
+        var reason = document.querySelector('input[name="reportReason"]:checked').value;
+        fetch('report', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: 'productId=' + productId + '&reason=' + encodeURIComponent(reason)
+        }).then(function(r) { return r.json(); }).then(function(data) {
+            alert(data.msg);
+            closeReport();
+        });
+    }
+</script>
+
 </body>
 </html>

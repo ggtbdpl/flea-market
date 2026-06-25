@@ -1,5 +1,7 @@
 package com.shumei.pojo;
 
+import java.math.BigDecimal;
+
 public class User {
     private Integer id;
     private String username;
@@ -10,6 +12,8 @@ public class User {
     private String avatar;
     private Integer status;
     private String createTime;
+    private BigDecimal balance;
+
 
     public User() {}
 
@@ -39,6 +43,13 @@ public class User {
 
     public String getCreateTime() { return createTime; }
     public void setCreateTime(String createTime) { this.createTime = createTime; }
+
+    public BigDecimal getBalance() {
+        return balance;
+    }
+    public void setBalance(BigDecimal balance) {
+        this.balance = balance;
+    }
 
     @Override
     public String toString() {

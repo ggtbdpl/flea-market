@@ -2337,7 +2337,7 @@
     <link rel="stylesheet" th:href="@{/static/font/iconfont.css}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎪</text></svg>">
+    <link rel="icon" type="image/png" th:href="@{/static/images/logo.png}">
     <meta name="ctx-path" th:content="${#httpServletRequest.getContextPath()}">
 </head>
 
@@ -2352,12 +2352,13 @@
 
 <header>
     <div class="logo">
-        <div class="iconfont icon-101tiaozaoshichang">️</div>
+        <img th:src="@{/static/images/logo.png}" alt="logo" style="width:42px;height:42px;">
         <div class="logo-text">
             <div class="logo-main">校园跳蚤市场</div>
             <div class="logo-sub">二手好物 · 环保便捷</div>
         </div>
     </div>
+
 
     <div class="search">
         <input type="text" placeholder="搜索书籍、电子产品、生活用品...">
@@ -2432,69 +2433,66 @@
 <div class="classify">
     <h2>商品分类</h2>
     <div class="category-list">
-        <div class="category-item">
-            <div class="category-icon book-icon">
-                <svg viewBox="0 0 64 64" width="48" height="48">
-                    <rect x="10" y="8" width="20" height="48" rx="2" fill="none" stroke="currentColor" stroke-width="2.5"/>
-                    <rect x="14" y="12" width="16" height="40" rx="1" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.3"/>
-                    <line x1="18" y1="20" x2="26" y2="20" stroke="currentColor" stroke-width="1.5" opacity="0.5"/>
-                    <line x1="18" y1="28" x2="26" y2="28" stroke="currentColor" stroke-width="1.5" opacity="0.5"/>
-                    <line x1="18" y1="36" x2="24" y2="36" stroke="currentColor" stroke-width="1.5" opacity="0.5"/>
-                    <rect x="34" y="12" width="20" height="40" rx="2" fill="none" stroke="currentColor" stroke-width="2.5" class="book-page-back"/>
-                    <path d="M34 16 Q44 14 54 16" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.4"/>
-                </svg>
+        <th:block th:each="c,iterStat : ${categoryList}">
+            <div class="category-item">
+                <th:block th:if="${iterStat.index == 0}">
+                    <div class="category-icon book-icon">
+                        <svg viewBox="0 0 64 64" width="48" height="48">
+                            <rect x="10" y="8" width="20" height="48" rx="2" fill="none" stroke="currentColor" stroke-width="2.5"/>
+                            <rect x="14" y="12" width="16" height="40" rx="1" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.3"/>
+                            <line x1="18" y1="20" x2="26" y2="20" stroke="currentColor" stroke-width="1.5" opacity="0.5"/>
+                            <line x1="18" y1="28" x2="26" y2="28" stroke="currentColor" stroke-width="1.5" opacity="0.5"/>
+                            <line x1="18" y1="36" x2="24" y2="36" stroke="currentColor" stroke-width="1.5" opacity="0.5"/>
+                            <rect x="34" y="12" width="20" height="40" rx="2" fill="none" stroke="currentColor" stroke-width="2.5" class="book-page-back"/>
+                            <path d="M34 16 Q44 14 54 16" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.4"/>
+                        </svg>
+                    </div>
+                </th:block>
+                <th:block th:if="${iterStat.index == 1}">
+                    <div class="category-icon tech-icon">
+                        <svg viewBox="0 0 64 64" width="48" height="48">
+                            <rect x="12" y="8" width="40" height="28" rx="3" fill="none" stroke="currentColor" stroke-width="2.5"/>
+                            <rect x="16" y="12" width="32" height="20" rx="1" fill="none" stroke="currentColor" stroke-width="1" opacity="0.3"/>
+                            <circle cx="32" cy="22" r="4" fill="none" stroke="currentColor" stroke-width="1.5" class="tech-pulse"/>
+                            <circle cx="32" cy="22" r="1.5" fill="currentColor" class="tech-dot"/>
+                            <rect x="22" y="40" width="20" height="3" rx="1.5" fill="currentColor" opacity="0.4"/>
+                            <rect x="26" y="46" width="12" height="3" rx="1.5" fill="currentColor" opacity="0.3"/>
+                            <line x1="28" y1="52" x2="36" y2="52" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="tech-signal"/>
+                        </svg>
+                    </div>
+                </th:block>
+                <th:block th:if="${iterStat.index == 2}">
+                    <div class="category-icon fashion-icon">
+                        <svg viewBox="0 0 64 64" width="48" height="48">
+                            <path d="M20 12 L24 8 L40 8 L44 12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            <line x1="32" y1="8" x2="32" y2="4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+                            <path d="M20 12 Q16 20 18 30 Q20 40 18 52" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="hanger-left"/>
+                            <path d="M44 12 Q48 20 46 30 Q44 40 46 52" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="hanger-right"/>
+                            <line x1="18" y1="52" x2="46" y2="52" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+                            <path d="M24 18 Q28 22 32 18 Q36 22 40 18" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.4" class="hanger-swing"/>
+                        </svg>
+                    </div>
+                </th:block>
+                <th:block th:if="${iterStat.index == 3}">
+                    <div class="category-icon sports-icon">
+                        <svg viewBox="0 0 64 64" width="48" height="48">
+                            <circle cx="32" cy="32" r="22" fill="none" stroke="currentColor" stroke-width="2.5"/>
+                            <path d="M32 10 L32 18 M32 46 L32 54 M10 32 L18 32 M46 32 L54 32" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity="0.3"/>
+                            <path d="M16 16 L22 22 M42 42 L48 48 M48 16 L42 22 M22 42 L16 48" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity="0.3"/>
+                            <circle cx="32" cy="32" r="8" fill="none" stroke="currentColor" stroke-width="2"/>
+                            <path d="M28 28 Q32 24 36 28 Q38 32 36 36 Q32 40 28 36 Q26 32 28 28" fill="currentColor" opacity="0.6" class="ball-bounce"/>
+                            <ellipse cx="32" cy="56" rx="8" ry="2" fill="currentColor" opacity="0.2" class="ball-shadow"/>
+                        </svg>
+                    </div>
+                </th:block>
+                <h3 th:text="${c.name}">教材书籍</h3>
+                <p th:text="${c.description}">课本、复习资料、小说杂志</p>
             </div>
-            <h3>教材书籍</h3>
-            <p>课本、复习资料、小说杂志</p>
-        </div>
-        <div class="category-item">
-            <div class="category-icon tech-icon">
-                <svg viewBox="0 0 64 64" width="48" height="48">
-                    <rect x="12" y="8" width="40" height="28" rx="3" fill="none" stroke="currentColor" stroke-width="2.5"/>
-                    <rect x="16" y="12" width="32" height="20" rx="1" fill="none" stroke="currentColor" stroke-width="1" opacity="0.3"/>
-                    <circle cx="32" cy="22" r="4" fill="none" stroke="currentColor" stroke-width="1.5" class="tech-pulse"/>
-                    <circle cx="32" cy="22" r="1.5" fill="currentColor" class="tech-dot"/>
-                    <rect x="22" y="40" width="20" height="3" rx="1.5" fill="currentColor" opacity="0.4"/>
-                    <rect x="26" y="46" width="12" height="3" rx="1.5" fill="currentColor" opacity="0.3"/>
-                    <line x1="28" y1="52" x2="36" y2="52" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="tech-signal"/>
-                </svg>
-            </div>
-            <h3>电子产品</h3>
-            <p>电脑、耳机、手机、配件</p>
-        </div>
-        <div class="category-item">
-            <div class="category-icon fashion-icon">
-                <svg viewBox="0 0 64 64" width="48" height="48">
-                    <path d="M20 12 L24 8 L40 8 L44 12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-                    <line x1="32" y1="8" x2="32" y2="4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
-                    <path d="M20 12 Q16 20 18 30 Q20 40 18 52" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="hanger-left"/>
-                    <path d="M44 12 Q48 20 46 30 Q44 40 46 52" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="hanger-right"/>
-                    <line x1="18" y1="52" x2="46" y2="52" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
-                    <path d="M24 18 Q28 22 32 18 Q36 22 40 18" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.4" class="hanger-swing"/>
-                </svg>
-            </div>
-            <h3>服装配饰</h3>
-            <p>衣服、鞋子、包包、饰品</p>
-        </div>
-        <div class="category-item">
-            <div class="category-icon sports-icon">
-                <svg viewBox="0 0 64 64" width="48" height="48">
-                    <circle cx="32" cy="32" r="22" fill="none" stroke="currentColor" stroke-width="2.5"/>
-                    <path d="M32 10 L32 18 M32 46 L32 54 M10 32 L18 32 M46 32 L54 32" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity="0.3"/>
-                    <path d="M16 16 L22 22 M42 42 L48 48 M48 16 L42 22 M22 42 L16 48" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity="0.3"/>
-                    <circle cx="32" cy="32" r="8" fill="none" stroke="currentColor" stroke-width="2"/>
-                    <path d="M28 28 Q32 24 36 28 Q38 32 36 36 Q32 40 28 36 Q26 32 28 28" fill="currentColor" opacity="0.6" class="ball-bounce"/>
-                    <ellipse cx="32" cy="56" rx="8" ry="2" fill="currentColor" opacity="0.2" class="ball-shadow"/>
-                </svg>
-            </div>
-            <h3>运动器材</h3>
-            <p>自行车、篮球、健身装备</p>
-        </div>
+        </th:block>
     </div>
 </div>
 
-
-<!-- 插入饼状图区块 -->
+    <!-- 插入饼状图区块 -->
 <div class="data-analysis">
     <h2>商品交易额分布（最近100天）</h2>
     <div class="chart-container">
@@ -2509,38 +2507,22 @@
 <div class="goods">
     <h2>热门商品</h2>
     <div class="goods-box">
-        <div class="item" data-id="1" data-name="联想笔记本电脑" data-price="1200" data-img="../static/images/素材 (2).jpg" data-desc="9成新 | 配置完好">
-            <button type="button" class="favorite-btn" title="收藏商品"><span class="iconfont icon-aixin1">️</span></button>
-            <img loading="lazy" th:src="@{/static/images/素材 (2).jpg}" alt="电脑" onerror="this.style.display='none'" />
-            <h3>联想笔记本电脑</h3>
-            <div class="price">¥1200</div>
-            <p>9成新 | 配置完好</p>
-        </div>
-
-        <div class="item" data-id="2" data-name="高等数学教材全套" data-price="50" data-img="../static/images/素材 (4).jpg" data-desc="有笔记 | 大一下适用">
-            <button type="button" class="favorite-btn" title="收藏商品"><span class="iconfont icon-aixin1">️</span></button>
-            <img loading="lazy" th:src="@{/static/images/素材 (4).jpg}" alt="高数" onerror="this.style.display='none'" />
-            <h3>高等数学教材全套</h3>
-            <div class="price">¥50</div>
-            <p>有笔记 | 大一下适用</p>
-        </div>
-
-        <div class="item" data-id="3" data-name="山地自行车 24速" data-price="380" data-img="../static/images/素材 (1).jpg" data-desc="8成新 | 校内代步神器">
-            <button type="button" class="favorite-btn" title="收藏商品"><span class="iconfont icon-aixin1">️</span></button>
-            <img loading="lazy" th:src="@{/static/images/素材 (1).jpg}" alt="自行车" onerror="this.style.display='none'" />
-            <h3>山地自行车 24速</h3>
-            <div class="price">¥380</div>
-            <p>8成新 | 校内代步神器</p>
-        </div>
-
-        <div class="item" data-id="4" data-name="降噪无线蓝牙耳机" data-price="150" data-img="../static/images/素材 (3).jpg" data-desc="9.5成新 | 音质清晰">
-            <button type="button" class="favorite-btn" title="收藏商品"><span class="iconfont icon-aixin1">️</span></button>
-            <img loading="lazy" th:src="@{/static/images/素材 (3).jpg}" alt="耳机" onerror="this.style.display='none'" />
-            <h3>降噪无线蓝牙耳机</h3>
-            <div class="price">¥150</div>
-            <p>9.5成新 | 音质清晰</p>
+        <div class="item" th:each="p : ${productList}"
+             th:data-id="${p.id}"
+             th:data-name="${p.title}"
+             th:data-price="${p.price}"
+             th:data-img="@{'/static/images/' + ${p.image}}"
+             th:data-desc="${p.condition} + ' | ' + ${p.description}">
+            <button type="button" class="favorite-btn" title="收藏商品">
+                <span class="iconfont icon-aixin1">️</span>
+            </button>
+            <img loading="lazy" th:src="@{'/static/images/' + ${p.image}}" th:alt="${p.title}" onerror="this.style.display='none'" />
+            <h3 th:text="${p.title}">联想笔记本电脑</h3>
+            <div class="price" th:text="'¥' + ${p.price}">¥1200</div>
+            <p th:text="${p.condition} + ' | ' + ${p.description}">9成新 | 配置完好</p>
         </div>
     </div>
+
 </div>
 
 <footer>
@@ -2611,14 +2593,9 @@
                 </div>
                 <div class="form-group">
                     <label for="productCategory">商品分类 *</label>
-                    <select id="productCategory" required>
+                    <select id="productCategory" name="categoryId" required>
                         <option value="">选择分类</option>
-                        <option value="books">图书教材</option>
-                        <option value="electronics">数码电子</option>
-                        <option value="clothes">服饰鞋包</option>
-                        <option value="daily">日用百货</option>
-                        <option value="sports">运动器材</option>
-                        <option value="other">其他</option>
+                        <option th:each="c : ${categoryList}" th:value="${c.id}" th:text="${c.name}"></option>
                     </select>
                 </div>
                 <div class="form-group">
@@ -2775,7 +2752,9 @@
     </div>
 </div>
 
-<script th:src="@{/static/js/script.js}"></script>
+<script th:src="@{/static/js/script.js?v=2}"></script>
+
+
 
 <!-- 用户登录注册JS -->
 <script>
@@ -2904,6 +2883,50 @@
         document.getElementById('registerModal').addEventListener('click', function(e) {
             if (e.target === this) closeRegisterModal();
         });
+    })();
+</script>
+<script>
+    (function() {
+        var params = new URLSearchParams(window.location.search);
+        if (params.get('showLogin') !== '1') return;
+
+        // 清除参数，避免刷新重复
+        history.replaceState(null, '', window.location.pathname);
+
+        function tryOpen() {
+            // 方式1：找文字包含"登录"或"我的账户"的按钮/链接，模拟点击
+            var all = document.querySelectorAll('a, button, div, span');
+            for (var i = 0; i < all.length; i++) {
+                var text = all[i].textContent.trim();
+                if ((text.indexOf('登录') !== -1 || text.indexOf('我的账户') !== -1) &&
+                    (all[i].onclick || all[i].getAttribute('data-toggle') === 'modal')) {
+                    console.log('[自动登录] 点击按钮:', all[i]);
+                    all[i].click();
+                    return;
+                }
+            }
+
+            // 方式2：找隐藏的登录模态框，直接显示
+            var modals = document.querySelectorAll('[id*="login"], [id*="Login"], [class*="modal"]');
+            for (var j = 0; j < modals.length; j++) {
+                var m = modals[j];
+                var style = window.getComputedStyle(m);
+                if (style.display === 'none' || m.classList.contains('hidden')) {
+                    console.log('[自动登录] 显示模态框:', m);
+                    m.style.display = 'flex';
+                    m.classList.remove('hidden');
+                    return;
+                }
+            }
+
+            console.log('[自动登录] 未找到登录按钮，请检查首页HTML');
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', tryOpen);
+        } else {
+            setTimeout(tryOpen, 200); // 延迟确保script.js已执行
+        }
     })();
 </script>
 

@@ -720,33 +720,41 @@ document.addEventListener('DOMContentLoaded', function() {
     // 商品卡片收藏按钮点击事件（事件委托）
     document.querySelector('.goods-box')?.addEventListener('click', function(e) {
         const btn = e.target.closest('.favorite-btn');
-        if (!btn) return;
+        const item = e.target.closest('.item');
 
-        e.preventDefault();
-        e.stopPropagation();
+        // 1. 点击了收藏按钮
+        if (btn && item) {
+            e.preventDefault();
+            e.stopPropagation();
 
-        const item = btn.closest('.item');
-        const id = item.dataset.id;
-        const name = item.dataset.name;
-        const price = item.dataset.price;
-        const img = item.dataset.img;
-        const desc = item.dataset.desc;
+            const id = item.dataset.id;
+            const name = item.dataset.name;
+            const price = item.dataset.price;
+            const img = item.dataset.img;
+            const desc = item.dataset.desc;
 
-        if (isFavorited(id)) {
-            removeFavorite(id);
-            btn.classList.remove('active');
-            btn.title = '收藏商品';
-            showToast(`已取消收藏「${name}」`, 'remove');
-        } else {
-            addFavorite({ id, name, price, img, desc });
-            btn.classList.add('active');
-            btn.classList.add('animating');
-            btn.title = '取消收藏';
-            showToast(`已收藏「${name}」`, 'add');
-            setTimeout(() => btn.classList.remove('animating'), 600);
+            if (isFavorited(id)) {
+                removeFavorite(id);
+                btn.classList.remove('active');
+                btn.title = '收藏商品';
+                showToast(`已取消收藏「${name}」`, 'remove');
+            } else {
+                addFavorite({ id, name, price, img, desc });
+                btn.classList.add('active');
+                btn.classList.add('animating');
+                btn.title = '取消收藏';
+                showToast(`已收藏「${name}」`, 'add');
+                setTimeout(() => btn.classList.remove('animating'), 600);
+            }
+            updateFavoritesModal();
+            return;
         }
 
-        updateFavoritesModal();
+        // 2. 点击了商品卡片（非收藏按钮）→ 跳转到详情页
+        if (item) {
+            const id = item.dataset.id;
+            window.location.href = 'product?id=' + id;
+        }
     });
 
     // 渲染收藏列表
@@ -1023,5 +1031,31 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     init();
+})();
+/* ==================== 商品卡片点击跳转（兜底绑定） ==================== */
+(function() {
+    var box = document.querySelector('.goods-box');
+    if (!box) {
+        console.error('[跳转绑定失败] .goods-box 未找到');
+        return;
+    }
+    box.addEventListener('click', function(e) {
+        var btn = e.target.closest('.favorite-btn');
+        var item = e.target.closest('.item');
+        if (btn && item) {
+            // 收藏按钮逻辑由前面代码处理，这里只阻止冒泡
+            return;
+        }
+        if (item) {
+            var id = item.getAttribute('data-id');
+            if (!id) {
+                console.error('[跳转失败] data-id 为空');
+                return;
+            }
+            console.log('[跳转] product?id=' + id);
+            window.location.href = 'product?id=' + id;
+        }
+    });
+    console.log('[跳转绑定成功] 已绑定到 .goods-box');
 })();
 

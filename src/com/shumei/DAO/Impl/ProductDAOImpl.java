@@ -199,4 +199,19 @@ public class ProductDAOImpl implements ProductDAO {
             DBUtil.close(conn, ps, null);
         }
     }
+
+    @Override
+    public int updateStatus(Integer id, Integer status) {
+        String sql = "UPDATE product SET status = ? WHERE id = ?";
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, status);
+            ps.setInt(2, id);
+            return ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return 0;
+        }
+    }
+
 }
