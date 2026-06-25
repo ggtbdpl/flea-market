@@ -9,8 +9,13 @@ public interface ProductDAO {
     ArrayList<Product> getAllProducts();
     Product getProductById(int id);
     ArrayList<Product> getProductByKeyword(String keyword);
+    ArrayList<Product> getProductByKeywordAndTag(String keyword, String tag, String sort);
+    ArrayList<String> getAllTags();
     boolean addProduct(Product product);
     boolean updateProduct(Product product);
-    boolean delProduct(int id);
     int updateStatus(Integer id, Integer status);
+    boolean delProduct(int id);
+    ArrayList<Product> getProductByFilter(String keyword, Integer categoryId, String condition, String sort);
+
+    ArrayList<String> getAllConditions();
 }

@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>搜索结果 - 校园跳蚤市场</title>
+    <link rel="stylesheet" th:href="@{/static/font/iconfont.css}">
+    <style>
+        :root {
+            --bg-primary: #f5f7fa;
+            --bg-secondary: #ffffff;
+            --text-primary: #333333;
+            --text-secondary: #666666;
+            --text-muted: #888888;
+            --accent-color: #0a8c7f;
+            --accent-hover: #0d9e8f;
+            --accent-light: #a8e6cf;
+            --border-color: #e0e0e0;
+            --shadow: 0 2px 8px rgba(0,0,0,0.06);
+            --shadow-hover: 0 8px 20px rgba(0,0,0,0.08);
+            --radius: 10px;
+        }
+
+        * { margin:0; padding:0; box-sizing:border-box; font-family: "Microsoft YaHei", sans-serif; }
+        body { background: var(--bg-primary); color: var(--text-primary); padding-top: 90px; }
+
+        /* Header */
+        header {
+            position: fixed; top: 0; left: 0; width: 100%; z-index: 1000;
+            background: #fff; padding: 15px 50px; border-bottom: 1px solid #eee;
+            display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+        .logo img { height: 40px; }
+        .search { display: flex; align-items: center; width: 420px; }
+        .search input {
+            flex: 1; height: 42px; padding: 0 18px;
+            border: 1px solid #e0e0e0; border-radius: 21px 0 0 21px;
+            outline: none; font-size: 14px; background: #f9f9f9;
+        }
+        .search input:focus { border-color: var(--accent-color); }
+        .search button {
+            height: 42px; width: 90px; background: var(--accent-color); color: white;
+            border: none; border-radius: 0 21px 21px 0; cursor: pointer; font-size: 14px;
+        }
+        .search button:hover { background: var(--accent-hover); }
+        .nav-links a { color: #555; text-decoration: none; margin-left: 25px; font-size: 15px; transition: 0.3s; }
+        .nav-links a:hover { color: var(--accent-color); }
+
+        /* 筛选栏 */
+        .filter-container { max-width: 1200px; margin: 25px auto; padding: 0 20px; }
+        .filter-bar {
+            background: #fff; border-radius: var(--radius); padding: 20px 25px;
+            box-shadow: var(--shadow); margin-bottom: 20px;
+        }
+        .filter-section { display: flex; align-items: flex-start; gap: 15px; margin-bottom: 15px; }
+        .filter-section:last-child { margin-bottom: 0; }
+        .filter-label { color: var(--text-secondary); font-size: 14px; font-weight: 600; min-width: 50px; padding-top: 6px; }
+        .tag-list { display: flex; flex-wrap: wrap; gap: 10px; }
+        .tag-pill {
+            display: inline-block; padding: 6px 16px; border-radius: 20px;
+            background: #f5f7fa; color: var(--text-secondary); font-size: 13px;
+            text-decoration: none; border: 1px solid transparent;
+            transition: all 0.2s ease;
+        }
+        .tag-pill:hover { background: var(--accent-light); color: var(--accent-color); border-color: var(--accent-light); }
+        .tag-pill.active { background: var(--accent-color); color: #fff; border-color: var(--accent-color); }
+
+        /* 排序栏 */
+        .sort-bar { display: flex; align-items: center; gap: 10px; }
+        .sort-btn {
+            display: inline-block; padding: 6px 16px; border-radius: 6px;
+            background: #f5f5f5; color: var(--text-secondary); font-size: 13px;
+            text-decoration: none; transition: all 0.2s;
+        }
+        .sort-btn:hover { background: var(--accent-light); color: var(--accent-color); }
+        .sort-btn.active { background: var(--accent-color); color: #fff; }
+
+        /* 结果统计 */
+        .results-header {
+            max-width: 1200px; margin: 0 auto 15px; padding: 0 20px;
+            font-size: 14px; color: var(--text-muted);
+        }
+        .results-header span { color: var(--accent-color); font-weight: bold; }
+
+        /* 结果区 */
+        .results { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+        .results-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px;
+        }
+        .item {
+            background: #fff; border-radius: var(--radius); padding: 15px;
+            box-shadow: var(--shadow); transition: all 0.3s ease; text-align: center;
+            text-decoration: none; color: inherit; display: block;
+        }
+        .item:hover { transform: translateY(-6px); box-shadow: var(--shadow-hover); }
+        .item img { width: 100%; height: 160px; object-fit: cover; border-radius: 6px; background: #f5f5f5; margin-bottom: 12px; }
+        .item h3 { font-size: 15px; color: var(--text-primary); margin-bottom: 8px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .item .price { color: #e74c3c; font-weight: bold; font-size: 18px; margin-bottom: 6px; }
+        .item p { color: var(--text-secondary); font-size: 13px; }
+        .item .tags { font-size: 12px; color: var(--accent-color); margin-top: 6px; }
+
+        /* 分页 */
+        .pagination {
+            display: flex; justify-content: center; align-items: center;
+            gap: 8px; margin: 40px 0 60px;
+        }
+        .page-btn {
+            display: inline-flex; align-items: center; justify-content: center;
+            min-width: 36px; height: 36px; padding: 0 12px;
+            background: #fff; border: 1px solid var(--border-color); border-radius: 6px;
+            color: var(--text-secondary); text-decoration: none; font-size: 14px;
+            transition: all 0.2s;
+        }
+        .page-btn:hover { border-color: var(--accent-color); color: var(--accent-color); }
+        .page-btn.active { background: var(--accent-color); color: #fff; border-color: var(--accent-color); }
+        .page-btn.disabled { color: #ccc; cursor: not-allowed; pointer-events: none; }
+
+        /* 空状态 */
+        .empty {
+            text-align: center; padding: 100px 20px; color: var(--text-muted);
+        }
+        .empty::before { content: "🔍"; display: block; font-size: 48px; margin-bottom: 15px; opacity: 0.4; }
+        .empty a { color: var(--accent-color); text-decoration: none; margin-top: 15px; display: inline-block; }
+        .empty a:hover { text-decoration: underline; }
+
+        @media (max-width: 768px) {
+            header { padding: 15px 20px; }
+            .search { width: 100%; margin-top: 10px; }
+            .results-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <a th:href="@{/index}" class="logo">
+        <img th:src="@{/static/images/logo.png}" alt="校园跳蚤市场">
+    </a>
+    <form th:action="@{/search}" method="get" class="search">
+        <input type="text" name="keyword" th:value="${keyword}" placeholder="搜索书籍、电子产品、生活用品...">
+        <button type="submit">搜索</button>
+    </form>
+    <div class="nav-links">
+        <a th:href="@{/index}">首页</a>
+        <a th:href="@{/user/center}">个人中心</a>
+    </div>
+</header>
+
+<div class="filter-container">
+    <div class="filter-bar">
+        <!-- 分类筛选 -->
+        <div class="filter-section">
+            <span class="filter-label">分类:</span>
+            <div class="tag-list">
+                <a th:href="@{/search(keyword=${keyword},condition=${condition},sort=${sort})}"
+                   th:class="${categoryId == null} ? 'tag-pill active' : 'tag-pill'">全部</a>
+                <a th:each="c : ${categoryList}"
+                   th:href="@{/search(keyword=${keyword},categoryId=${c.id},condition=${condition},sort=${sort})}"
+                   th:text="${c.name}"
+                   th:class="${categoryId != null && categoryId == c.id} ? 'tag-pill active' : 'tag-pill'">分类</a>
+            </div>
+        </div>
+        <!-- 成色筛选 -->
+        <div class="filter-section">
+            <span class="filter-label">成色:</span>
+            <div class="tag-list">
+                <a th:href="@{/search(keyword=${keyword},categoryId=${categoryId},sort=${sort})}"
+                   th:class="${condition == null || condition == ''} ? 'tag-pill active' : 'tag-pill'">全部</a>
+                <a th:each="c : ${conditionList}"
+                   th:href="@{/search(keyword=${keyword},categoryId=${categoryId},condition=${c},sort=${sort})}"
+                   th:text="${c}"
+                   th:class="${condition != null && condition == c} ? 'tag-pill active' : 'tag-pill'">成色</a>
+            </div>
+        </div>
+        <!-- 排序 -->
+        <div class="filter-section">
+            <span class="filter-label">排序:</span>
+            <div class="sort-bar">
+                <a th:href="@{/search(keyword=${keyword},categoryId=${categoryId},condition=${condition},sort='default')}"
+                   th:class="${sort == 'default' or sort == null} ? 'sort-btn active' : 'sort-btn'">综合</a>
+                <a th:href="@{/search(keyword=${keyword},categoryId=${categoryId},condition=${condition},sort='price_asc')}"
+                   th:class="${sort == 'price_asc'} ? 'sort-btn active' : 'sort-btn'">价格↑</a>
+                <a th:href="@{/search(keyword=${keyword},categoryId=${categoryId},condition=${condition},sort='price_desc')}"
+                   th:class="${sort == 'price_desc'} ? 'sort-btn active' : 'sort-btn'">价格↓</a>
+                <a th:href="@{/search(keyword=${keyword},categoryId=${categoryId},condition=${condition},sort='newest')}"
+                   th:class="${sort == 'newest'} ? 'sort-btn active' : 'sort-btn'">最新</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 结果统计 -->
+<div class="results-header" th:if="${totalItems > 0}">
+    共找到 <span th:text="${totalItems}">0</span> 件商品
+</div>
+
+<!-- 结果网格 -->
+<div class="results" th:if="${not #lists.isEmpty(products)}">
+    <div class="results-grid">
+        <a class="item" th:each="p : ${products}" th:href="@{/product(id=${p.id})}">
+            <img th:src="'/static/images/' + ${p.image}" th:alt="${p.title}" onerror="this.style.display='none'">
+            <h3 th:text="${p.title}">商品标题</h3>
+            <div class="price">¥<span th:text="${p.price}">0</span></div>
+            <p th:text="${p.condition}">成色</p>
+            <p th:if="${p.tags != null}" class="tags" th:text="${p.tags}">标签</p>
+        </a>
+    </div>
+
+    <!-- 分页 -->
+    <div class="pagination" th:if="${totalPages > 1}">
+        <a th:if="${currentPage > 1}"
+           th:href="@{/search(keyword=${keyword},categoryId=${categoryId},condition=${condition},sort=${sort},page=${currentPage - 1})}"
+           class="page-btn">上一页</a>
+        <span th:each="i : ${#numbers.sequence(1, totalPages)}">
+            <a th:href="@{/search(keyword=${keyword},categoryId=${categoryId},condition=${condition},sort=${sort},page=${i})}"
+               th:text="${i}"
+               th:class="${i == currentPage} ? 'page-btn active' : 'page-btn'">1</a>
+        </span>
+        <a th:if="${currentPage < totalPages}"
+           th:href="@{/search(keyword=${keyword},categoryId=${categoryId},condition=${condition},sort=${sort},page=${currentPage + 1})}"
+           class="page-btn">下一页</a>
+    </div>
+</div>
+
+<!-- 空状态 -->
+<div class="empty" th:if="${#lists.isEmpty(products)}">
+    <p>未找到相关商品</p>
+    <p style="font-size: 13px; margin-top: 10px;">换个关键词或清除筛选条件试试</p>
+    <a th:href="@{/search}">查看全部商品</a>
+    <span style="margin: 0 8px;">|</span>
+    <a th:href="@{/index}">返回首页</a>
+</div>
+
+</body>
+</html>

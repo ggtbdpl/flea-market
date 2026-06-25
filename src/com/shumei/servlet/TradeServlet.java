@@ -1,248 +1,168 @@
 package com.shumei.servlet;
 
-import com.shumei.DAO.ProductDAO;
-import com.shumei.DAO.UserDAO;
 import com.shumei.DAO.Impl.ProductDAOImpl;
+import com.shumei.DAO.Impl.TradeDAOImpl;
 import com.shumei.DAO.Impl.UserDAOImpl;
+import com.shumei.DAO.ProductDAO;
+import com.shumei.DAO.TradeDAO;
+import com.shumei.DAO.UserDAO;
 import com.shumei.pojo.Product;
+import com.shumei.pojo.Trade;
 import com.shumei.pojo.User;
-import com.shumei.util.DBUtil;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.math.BigDecimal;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import java.time.LocalDateTime;
+import java.net.URLEncoder;
 
 @WebServlet("/trade")
-public class TradeServlet extends HttpServlet {
+public class TradeServlet extends ViewBaseServlet {
 
-    private ProductDAO productDAO = new ProductDAOImpl();
+    private TradeDAO tradeDAO = new TradeDAOImpl();
     private UserDAO userDAO = new UserDAOImpl();
+    private ProductDAO productDAO = new ProductDAOImpl();
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         req.setCharacterEncoding("UTF-8");
-        resp.setContentType("application/json;charset=UTF-8");
-        PrintWriter out = resp.getWriter();
 
         HttpSession session = req.getSession(false);
         User user = (session != null) ? (User) session.getAttribute("user") : null;
         if (user == null) {
-            out.print("{\"success\":false,\"msg\":\"请先登录\"}");
+            resp.sendRedirect(req.getContextPath() + "/user/center?toast=请先登录");
             return;
         }
 
         String action = req.getParameter("action");
+
         if ("create".equals(action)) {
-            createTrade(req, out, user);
+            doCreate(req, resp, user);
         } else if ("confirm".equals(action)) {
-            confirmTrade(req, out, user);
+            doConfirm(req, resp, user);
         } else if ("receive".equals(action)) {
-            receiveTrade(req, out, user);
+            doReceive(req, resp, user);
         } else {
-            out.print("{\"success\":false,\"msg\":\"未知操作\"}");
+            resp.sendRedirect(req.getContextPath() + "/user/center?toast=非法操作");
         }
     }
 
-    private void createTrade(HttpServletRequest req, PrintWriter out, User buyer) {
+    private void doCreate(HttpServletRequest req, HttpServletResponse resp, User user) throws IOException {
         String productIdStr = req.getParameter("productId");
-        if (productIdStr == null) {
-            out.print("{\"success\":false,\"msg\":\"参数错误\"}");
+        int productId;
+        try {
+            productId = Integer.parseInt(productIdStr);
+        } catch (Exception e) {
+            resp.sendRedirect(req.getContextPath() + "/user/center?toast=参数错误");
             return;
         }
 
-        Connection conn = null;
-        try {
-            int productId = Integer.parseInt(productIdStr);
-            Product product = productDAO.getProductById(productId);
-            if (product == null) {
-                out.print("{\"success\":false,\"msg\":\"商品不存在\"}");
-                return;
-            }
-            if (product.getStatus() != null && product.getStatus() == 3) {
-                out.print("{\"success\":false,\"msg\":\"商品已售出\"}");
-                return;
-            }
-            if (product.getUserId() != null && product.getUserId().equals(buyer.getId())) {
-                out.print("{\"success\":false,\"msg\":\"不能购买自己的商品\"}");
-                return;
-            }
-
-            BigDecimal price = product.getPrice();
-            BigDecimal balance = userDAO.getBalance(buyer.getId());
-            if (balance == null || balance.compareTo(price) < 0) {
-                out.print("{\"success\":false,\"msg\":\"余额不足\"}");
-                return;
-            }
-
-            conn = DBUtil.getConnection();
-            conn.setAutoCommit(false);
-
-            // 扣买家余额
-            try (PreparedStatement ps = conn.prepareStatement("UPDATE user SET balance = balance - ? WHERE id = ?")) {
-                ps.setBigDecimal(1, price);
-                ps.setInt(2, buyer.getId());
-                if (ps.executeUpdate() <= 0) {
-                    conn.rollback();
-                    out.print("{\"success\":false,\"msg\":\"扣款失败\"}");
-                    return;
-                }
-            }
-
-            // 加卖家余额
-            if (product.getUserId() != null) {
-                try (PreparedStatement ps = conn.prepareStatement("UPDATE user SET balance = balance + ? WHERE id = ?")) {
-                    ps.setBigDecimal(1, price);
-                    ps.setInt(2, product.getUserId());
-                    if (ps.executeUpdate() <= 0) {
-                        conn.rollback();
-                        out.print("{\"success\":false,\"msg\":\"转账失败\"}");
-                        return;
-                    }
-                }
-            }
-
-            // 创建 trade
-            try (PreparedStatement ps = conn.prepareStatement(
-                    "INSERT INTO trade (product_id, buyer_id, seller_id, amount, status, remark) VALUES (?, ?, ?, ?, ?, ?)")) {
-                ps.setInt(1, productId);
-                ps.setInt(2, buyer.getId());
-                ps.setInt(3, product.getUserId());
-                ps.setBigDecimal(4, price);
-                ps.setString(5, "pending");
-                ps.setString(6, "买家发起购买请求");
-                if (ps.executeUpdate() <= 0) {
-                    conn.rollback();
-                    out.print("{\"success\":false,\"msg\":\"创建订单失败\"}");
-                    return;
-                }
-            }
-
-            // 更新商品状态为已售出
-            try (PreparedStatement ps = conn.prepareStatement("UPDATE product SET status = 3 WHERE id = ?")) {
-                ps.setInt(1, productId);
-                if (ps.executeUpdate() <= 0) {
-                    conn.rollback();
-                    out.print("{\"success\":false,\"msg\":\"更新商品状态失败\"}");
-                    return;
-                }
-            }
-
-            conn.commit();
-            out.print("{\"success\":true,\"msg\":\"购买请求已发起，等待卖家确认\"}");
-
-        } catch (Exception e) {
-            if (conn != null) try { conn.rollback(); } catch (SQLException ignored) {}
-            e.printStackTrace();
-            out.print("{\"success\":false,\"msg\":\"系统错误\"}");
-        } finally {
-            if (conn != null) try { conn.close(); } catch (SQLException ignored) {}
+        Product product = productDAO.getProductById(productId);
+        if (product == null) {
+            resp.sendRedirect(req.getContextPath() + "/user/center?toast=商品不存在");
+            return;
         }
+        if (product.getStatus() != 1) {
+            resp.sendRedirect(req.getContextPath() + "/user/center?toast=商品已下架或已售出");
+            return;
+        }
+        if (product.getUserId().equals(user.getId())) {
+            resp.sendRedirect(req.getContextPath() + "/user/center?toast=不能购买自己的商品");
+            return;
+        }
+
+        BigDecimal price = product.getPrice();
+        BigDecimal balance = userDAO.getBalance(user.getId());
+        if (balance == null) balance = BigDecimal.ZERO;
+        if (balance.compareTo(price) < 0) {
+            resp.sendRedirect(req.getContextPath() + "/user/center?toast=余额不足");
+            return;
+        }
+
+        // 扣除买家余额
+        userDAO.updateBalance(user.getId(), balance.subtract(price));
+        // 增加卖家余额
+        User seller = userDAO.getUserById(product.getUserId());
+        if (seller != null) {
+            BigDecimal sellerBalance = userDAO.getBalance(seller.getId());
+            if (sellerBalance == null) sellerBalance = BigDecimal.ZERO;
+            userDAO.updateBalance(seller.getId(), sellerBalance.add(price));
+        }
+
+        // 创建交易记录
+        Trade trade = new Trade();
+        trade.setBuyerId(user.getId());
+        trade.setSellerId(product.getUserId());
+        trade.setProductId(productId);
+        trade.setAmount(price);
+        trade.setStatus("pending");
+        trade.setCreateTime(LocalDateTime.now());
+        tradeDAO.createTrade(trade);
+
+        // 更新商品状态为已售出
+        productDAO.updateStatus(productId, 3);
+
+        resp.sendRedirect(req.getContextPath() + "/user/center?toast=" + URLEncoder.encode("购买成功，等待卖家确认", "UTF-8"));
     }
 
-    private void confirmTrade(HttpServletRequest req, PrintWriter out, User seller) {
+    private void doConfirm(HttpServletRequest req, HttpServletResponse resp, User user) throws IOException {
         String tradeIdStr = req.getParameter("tradeId");
-        if (tradeIdStr == null) {
-            out.print("{\"success\":false,\"msg\":\"参数错误\"}");
+        int tradeId;
+        try {
+            tradeId = Integer.parseInt(tradeIdStr);
+        } catch (Exception e) {
+            resp.sendRedirect(req.getContextPath() + "/user/center?toast=参数错误");
             return;
         }
 
-        Connection conn = null;
-        try {
-            int tradeId = Integer.parseInt(tradeIdStr);
-            conn = DBUtil.getConnection();
-
-            // 校验：卖家身份 + pending 状态
-            try (PreparedStatement ps = conn.prepareStatement(
-                    "SELECT seller_id, status FROM trade WHERE id = ?")) {
-                ps.setInt(1, tradeId);
-                var rs = ps.executeQuery();
-                if (!rs.next()) {
-                    out.print("{\"success\":false,\"msg\":\"订单不存在\"}");
-                    return;
-                }
-                if (rs.getInt("seller_id") != seller.getId()) {
-
-                    out.print("{\"success\":false,\"msg\":\"无权操作\"}");
-                    return;
-                }
-                if (!"pending".equals(rs.getString("status"))) {
-                    out.print("{\"success\":false,\"msg\":\"订单状态错误\"}");
-                    return;
-                }
-            }
-
-            try (PreparedStatement ps = conn.prepareStatement("UPDATE trade SET status = 'contacting' WHERE id = ?")) {
-                ps.setInt(1, tradeId);
-                if (ps.executeUpdate() > 0) {
-                    out.print("{\"success\":true,\"msg\":\"已确认交易，等待买家收货\"}");
-                } else {
-                    out.print("{\"success\":false,\"msg\":\"操作失败\"}");
-                }
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            out.print("{\"success\":false,\"msg\":\"系统错误\"}");
-        } finally {
-            if (conn != null) try { conn.close(); } catch (SQLException ignored) {}
+        Trade trade = tradeDAO.getTradeById(tradeId);
+        if (trade == null) {
+            resp.sendRedirect(req.getContextPath() + "/user/center?toast=订单不存在");
+            return;
         }
+        if (!trade.getSellerId().equals(user.getId())) {
+            resp.sendRedirect(req.getContextPath() + "/user/center?toast=无权操作");
+            return;
+        }
+        if (!"pending".equals(trade.getStatus())) {
+            resp.sendRedirect(req.getContextPath() + "/user/center?toast=订单状态异常");
+            return;
+        }
+
+        tradeDAO.updateTradeStatus(tradeId, "contacting");
+        resp.sendRedirect(req.getContextPath() + "/user/center?toast=" + URLEncoder.encode("交易已确认，等待买家收货", "UTF-8"));
     }
 
-    private void receiveTrade(HttpServletRequest req, PrintWriter out, User buyer) {
+    private void doReceive(HttpServletRequest req, HttpServletResponse resp, User user) throws IOException {
         String tradeIdStr = req.getParameter("tradeId");
-        if (tradeIdStr == null) {
-            out.print("{\"success\":false,\"msg\":\"参数错误\"}");
+        int tradeId;
+        try {
+            tradeId = Integer.parseInt(tradeIdStr);
+        } catch (Exception e) {
+            resp.sendRedirect(req.getContextPath() + "/user/center?toast=参数错误");
             return;
         }
 
-        Connection conn = null;
-        try {
-            int tradeId = Integer.parseInt(tradeIdStr);
-            conn = DBUtil.getConnection();
-
-            // 校验：买家身份 + contacting 状态
-            try (PreparedStatement ps = conn.prepareStatement(
-                    "SELECT buyer_id, status FROM trade WHERE id = ?")) {
-                ps.setInt(1, tradeId);
-                var rs = ps.executeQuery();
-                if (!rs.next()) {
-                    out.print("{\"success\":false,\"msg\":\"订单不存在\"}");
-                    return;
-                }
-                if (rs.getInt("buyer_id") != buyer.getId()) {
-                    out.print("{\"success\":false,\"msg\":\"无权操作\"}");
-                    return;
-                }
-                if (!"contacting".equals(rs.getString("status"))) {
-                    out.print("{\"success\":false,\"msg\":\"订单状态错误\"}");
-                    return;
-                }
-            }
-
-            try (PreparedStatement ps = conn.prepareStatement(
-                    "UPDATE trade SET status = 'completed', complete_time = NOW() WHERE id = ?")) {
-                ps.setInt(1, tradeId);
-                if (ps.executeUpdate() > 0) {
-                    out.print("{\"success\":true,\"msg\":\"确认收货成功，交易完成\"}");
-                } else {
-                    out.print("{\"success\":false,\"msg\":\"操作失败\"}");
-                }
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            out.print("{\"success\":false,\"msg\":\"系统错误\"}");
-        } finally {
-            if (conn != null) try { conn.close(); } catch (SQLException ignored) {}
+        Trade trade = tradeDAO.getTradeById(tradeId);
+        if (trade == null) {
+            resp.sendRedirect(req.getContextPath() + "/user/center?toast=订单不存在");
+            return;
         }
+        if (!trade.getBuyerId().equals(user.getId())) {
+            resp.sendRedirect(req.getContextPath() + "/user/center?toast=无权操作");
+            return;
+        }
+        if (!"contacting".equals(trade.getStatus())) {
+            resp.sendRedirect(req.getContextPath() + "/user/center?toast=订单状态异常");
+            return;
+        }
+
+        tradeDAO.updateTradeStatus(tradeId, "completed");
+        tradeDAO.updateTradeCompleteTime(tradeId);
+        resp.sendRedirect(req.getContextPath() + "/user/center?toast=" + URLEncoder.encode("确认收货成功，交易完成", "UTF-8"));
     }
 }

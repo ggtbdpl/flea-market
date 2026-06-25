@@ -17,6 +17,7 @@ public class Product {
     private Integer status;
     private String createTime;
     private String updateTime;
+    private String tags;
 
     public Product() {}
 
@@ -62,6 +63,9 @@ public class Product {
     public String getUpdateTime() { return updateTime; }
     public void setUpdateTime(String updateTime) { this.updateTime = updateTime; }
 
+    public String getTags() { return tags; }
+    public void setTags(String tags) { this.tags = tags; }
+
     @Override
     public String toString() {
         return "Product{" +
@@ -72,6 +76,7 @@ public class Product {
                 ", image='" + image + '\'' +
                 ", contact='" + contact + '\'' +
                 ", status=" + status +
+                ", tags='" + tags + '\'' +
                 '}';
     }
 }

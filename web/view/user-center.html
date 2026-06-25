@@ -267,10 +267,12 @@
                 </div>
                 <div class="trade-list" th:if="${sellerTrades != null and !sellerTrades.isEmpty()}">
                     <div class="trade-item" th:each="t : ${sellerTrades}">
-                        <img th:src="@{'/static/images/' + ${t.productImage}}" alt="" onerror="this.style.display='none'">
+                        <img th:src="${t.productImage != null} ? '/static/images/' + ${t.productImage} : '/static/images/default.png'" alt="" onerror="this.style.display='none'">
                         <div class="trade-detail">
                             <h4><a th:href="@{/product(id=${t.productId})}" th:text="${t.productTitle}">商品名</a></h4>
                             <p>¥<span th:text="${t.amount}">0</span> · <span th:text="${t.createTimeStr}">时间</span></p>
+                            <p style="margin-top:4px;">买家ID：<span th:text="${t.buyerId}">0</span></p>
+
                         </div>
                         <span class="trade-status" th:classappend="${t.status == 'pending'} ? 'status-pending' : (${t.status == 'contacting'} ? 'status-contacting' : 'status-completed')"
                               th:text="${t.status == 'pending'} ? '待确认' : (${t.status == 'contacting'} ? '交易中' : '已完成')">状态</span>
@@ -355,6 +357,15 @@
 </div>
 
 <script>
+    (function() {
+        var params = new URLSearchParams(location.search);
+        var toast = params.get('toast');
+        if (toast) {
+            showToast(toast, 'success');
+            history.replaceState(null, '', location.pathname);
+        }
+    })();
+
     function showToast(msg, type) {
         var container = document.getElementById('toastContainer');
         if (!container) {

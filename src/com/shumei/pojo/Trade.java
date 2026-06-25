@@ -15,6 +15,7 @@ public class Trade {
     private LocalDateTime createTime;
     private LocalDateTime completeTime;
 
+
     // 辅助字段（用于前端展示，不入库）
     private String productTitle;
     private String productImage;
