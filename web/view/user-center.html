@@ -222,8 +222,15 @@
 
     <div class="main">
         <div class="user-card">
-            <img th:if="${user.avatar != null}" th:src="@{'/' + ${user.avatar}}" class="user-avatar-img" onerror="this.style.display='none'">
-            <div th:if="${user.avatar == null}" class="user-avatar" th:text="${user.nickname != null ? #strings.substring(user.nickname,0,1) : '用'}">用</div>
+            <div class="user-card">
+                <img th:if="${user.avatar != null and user.avatar != ''}"
+                     th:src="@{${user.avatar}}"
+                     class="user-avatar-img"
+                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                <div class="user-avatar"
+                     th:style="${user.avatar != null and user.avatar != ''} ? 'display:none;' : ''"
+                     th:text="${user.nickname != null ? #strings.substring(user.nickname,0,1) : '用'}">用</div>
+            </div>
             <div class="user-info">
                 <div class="user-name-row">
                     <span class="user-name" th:text="${user.nickname}">昵称</span>
